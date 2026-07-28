@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telebar - Smart POS & Inventory</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
+</head>
+<body>
+  <div id="app">
+    <!-- 1. AUTHENTICATION COMPONENT -->
+    <div id="auth-screen" class="auth-wrapper">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo" data-i18n="brand">telebar</div>
+          <h2 class="auth-title" id="auth-title-text" data-i18n="login_title">Telebar POS Terminali</h2>
+          <div style="text-align: center; font-size: 11px; color: var(--accent); margin-top: 6px; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9;">TIZIM PORT: 5174 (YANGILANGAN)</div>
+        </div>
+        
+        <!-- Step 1: Email & Password -->
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" data-i18n="email_label">Gmail Manzili</label>
+            <input type="email" id="login-email" class="neo-input" placeholder="misol@gmail.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="pass_label">Tizim Paroli</label>
+            <input type="password" id="login-password" class="neo-input" placeholder="Parolni kiriting" required>
+          </div>
+          <button type="submit" class="btn-primary" data-i18n="btn_next">Davom Etish</button>
+        </form>
+
+        <!-- Step 2: PIN Code Pad (For Cashiers) -->
+        <div id="pin-pad-container" style="display: none;">
+          <div class="form-group">
+            <label class="form-label" style="text-align: center;" data-i18n="pin_label">Shaxsiy PIN Kod</label>
+            <div class="pin-display">
+              <div class="pin-dot"></div>
+              <div class="pin-dot"></div>
+              <div class="pin-dot"></div>
+              <div class="pin-dot"></div>
+            </div>
+            <div class="pin-grid">
+              <button class="pin-btn num-key" data-value="1">1</button>
+              <button class="pin-btn num-key" data-value="2">2</button>
+              <button class="pin-btn num-key" data-value="3">3</button>
+              <button class="pin-btn num-key" data-value="4">4</button>
+              <button class="pin-btn num-key" data-value="5">5</button>
+              <button class="pin-btn num-key" data-value="6">6</button>
+              <button class="pin-btn num-key" data-value="7">7</button>
+              <button class="pin-btn num-key" data-value="8">8</button>
+              <button class="pin-btn num-key" data-value="9">9</button>
+              <button class="pin-btn" id="pin-clear" data-i18n="btn_back">Orqaga</button>
+              <button class="pin-btn num-key" data-value="0">0</button>
+              <button class="pin-btn" id="pin-submit" data-i18n="btn_login">Kirish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MAIN ECOSYSTEM DASHBOARD SHELL (Hidden initially) -->
+    <div id="main-shell" style="display: none; flex-direction: row; min-height: 100vh;">
+      <aside class="app-sidebar">
+        <div class="sidebar-top">
+          <div class="brand-logo" id="logo-branding-text" data-i18n="brand">telebar</div>
+          
+          <!-- Live Session Debugger -->
+          <div id="debug-banner" style="font-size: 10px; color: var(--accent); background: rgba(0, 242, 254, 0.08); padding: 8px; border-radius: 8px; font-family: monospace; border: 1px solid rgba(0, 242, 254, 0.15);">
+            Token: <span id="debug-token">null</span>
+          </div>
+
+          <div class="user-status-badge">
+            <span class="status-dot"></span>
+            <div class="user-info-text">
+              <span id="header-user-name">Kassir</span>
+              <span id="header-user-role" data-i18n="role_cashier">Kassir</span>
+            </div>
+          </div>
+        </div>
+
+        <nav class="app-nav">
+          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" data-i18n="nav_dashboard" style="display: none;" draggable="true">Boshqaruv Paneli</a>
+          <a class="nav-link" data-view="pos" id="nav-pos-tab" data-i18n="nav_pos" draggable="true">Sotuv (POS)</a>
+          <a class="nav-link" data-view="warehouse" id="nav-wh" data-i18n="nav_warehouse" draggable="true">Omborxona</a>
+          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" data-i18n="nav_staff" style="display: none;" draggable="true">Xodimlar</a>
+          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" data-i18n="nav_branches" style="display: none;" draggable="true">Ob'yektlar</a>
+          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 6px;"></i>Click Integratsiya</a>
+          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 6px;"></i>Oxirgi Amallar</a>
+          <a class="nav-link admin-only" data-view="settings" id="nav-set" data-i18n="nav_settings" style="display: none;" draggable="true">Sozlamalar</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <button class="btn-secondary" id="logout-btn" data-i18n="btn_logout">Chiqish</button>
+        </div>
+      </aside>
+
+      <!-- Right Main Content Panel -->
+      <div class="main-content-wrapper" style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+        <main class="app-content">
+        <!-- 2A. DASHBOARD TAB VIEW -->
+        <section id="view-dashboard" class="tab-view">
+          <div class="stats-grid">
+            <div class="glass-card">
+              <div class="card-title" data-i18n="dash_total_revenue">Umumiy Tushum</div>
+              <div class="card-value text-accent" id="stat-revenue">$0.00</div>
+              <div class="card-desc" data-i18n="dash_revenue_desc">Barcha savdolardan kelgan mablag'</div>
+            </div>
+            <div class="glass-card">
+              <div class="card-title" data-i18n="dash_expenses">Umumiy Xarajatlar</div>
+              <div class="card-value" id="stat-expenses" style="color: var(--color-danger);">$0.00</div>
+              <div class="card-desc" data-i18n="dash_expenses_desc">Ish haqi va ekspluatatsiya</div>
+            </div>
+            <div class="glass-card">
+              <div class="card-title" data-i18n="dash_inventory_val">Ombor Balansi</div>
+              <div class="card-value" id="stat-inventory">$0.00</div>
+              <div class="card-desc" data-i18n="dash_inventory_desc">Tannarx bo'yicha qiymat</div>
+            </div>
+            <div class="glass-card">
+              <div class="card-title" data-i18n="dash_active_shift">Faol Navbatchilik</div>
+              <div class="card-value" id="stat-shift" style="font-size: 22px; color: var(--color-success); padding-top: 10px;">Faol emas</div>
+              <div class="card-desc" data-i18n="dash_shift_desc">Joriy kassir va shift</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;">
+            <!-- Shift Financial Cards -->
+            <div class="glass-card">
+              <h3 class="card-title" style="margin-bottom: 20px;" data-i18n="dash_financial_cards">Shift turlari bo'yicha tushum</h3>
+              <div style="display: flex; gap: 20px;">
+                <div class="glass-card" style="flex: 1; text-align: center; box-shadow: var(--neo-flat);">
+                  <h4 data-i18n="dash_day_shift">Kunduzgi Shift</h4>
+                  <div class="card-value text-accent" id="day-shift-val" style="font-size: 26px; margin-top: 10px;">$0.00</div>
+                </div>
+                <div class="glass-card" style="flex: 1; text-align: center; box-shadow: var(--neo-flat);">
+                  <h4 data-i18n="dash_night_shift">Tungi Shift</h4>
+                  <div class="card-value text-accent" id="night-shift-val" style="font-size: 26px; margin-top: 10px;">$0.00</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shift Audit Logs -->
+            <div class="glass-card" style="display: flex; flex-direction: column;">
+              <h3 class="card-title" style="margin-bottom: 20px;" data-i18n="dash_audit_log">Shiftlar Almashinuvi Auditi</h3>
+              <div style="flex: 1; max-height: 240px; overflow-y: auto; padding-right: 8px;" id="shift-transition-logs">
+                <!-- Loaded via sockets / api -->
+                <div style="text-align: center; color: var(--color-text-secondary); padding-top: 40px;" data-i18n="dash_no_shifts">Hozircha o'tishlar qayd etilmagan</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location Breakdown Card -->
+          <div class="glass-card" style="margin-top: 24px;">
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="dash_location_breakdown">Filiallar va Ob'yektlar bo'yicha sotuv</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;" id="dashboard-location-breakdown">
+              <div style="text-align: center; color: var(--color-text-secondary); padding: 20px;" data-i18n="dash_no_location_sales">Sotuvlar joylashuv bo'yicha tahlil qilinmoqda...</div>
+            </div>
+          </div>
+
+          <!-- Sales History Card -->
+          <div class="glass-card" style="margin-top: 24px;">
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="dash_sales_history">Sotuvlar Tarixi</h3>
+            <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+              <table class="neo-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="wh_col_model">Smartfon</th>
+                    <th data-i18n="wh_col_qr">Shtrix/QR</th>
+                    <th data-i18n="wh_col_qty">Soni</th>
+                    <th data-i18n="pos_total">Summa</th>
+                    <th data-i18n="staff_col_name">Sotuvchi</th>
+                    <th data-i18n="wh_col_actions">Vaqt</th>
+                  </tr>
+                </thead>
+                <tbody id="sales-history-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2B. POINT-OF-SALE (POS) TAB VIEW -->
+        <section id="view-pos" class="tab-view" style="display: none;">
+          <div class="pos-grid">
+            <div>
+              <div class="search-bar-container">
+                <input type="text" id="pos-search" class="neo-input" data-i18n="pos_search_placeholder" placeholder="Model yoki shtrixkod bo'yicha qidiruv...">
+              </div>
+              <h3 class="card-title" style="margin-bottom: 16px;" data-i18n="pos_catalog">Smartfonlar Katalogi</h3>
+              <div class="product-grid" id="pos-product-list">
+                <!-- Dynamically loaded -->
+              </div>
+            </div>
+
+            <!-- Cart Section -->
+            <div class="glass-card cart-card">
+              <h3 class="card-title" data-i18n="pos_cart">Sotuv Savatchasi</h3>
+              
+              <!-- Simulating peripheral hardware scanning -->
+              <div class="glass-card" style="padding: 12px; margin-top: 8px; border-color: rgba(0, 242, 254, 0.2);">
+                <div style="font-size: 12px; margin-bottom: 6px; font-weight: 600;" data-i18n="pos_scan_title">QR Skanerni Simulyatsiya Qilish</div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="simulated-qr-input" class="neo-input" style="padding: 6px 12px; font-size: 13px;" placeholder="TEL-XXXXX">
+                  <button class="btn-primary" id="sim-scan-btn" style="width: auto; padding: 6px 12px; font-size: 13px;" data-i18n="pos_btn_scan">Skanerlash</button>
+                </div>
+              </div>
+
+              <!-- Manual Sale Selection -->
+              <div class="glass-card" style="padding: 12px; margin-top: 8px; border-color: rgba(16, 185, 129, 0.2);">
+                <div style="font-size: 12px; margin-bottom: 6px; font-weight: 600;">Qo'lda sotish (Telefon modelini tanlash)</div>
+                <div style="display: flex; gap: 8px; flex-direction: column;">
+                  <select id="pos-manual-product-select" class="neo-input" style="padding: 6px; font-size: 13px; width: 100%; background: var(--bg-secondary); border-radius: 6px;">
+                    <option value="">-- Telefonni tanlang --</option>
+                  </select>
+                  <button class="btn-primary" id="pos-manual-add-btn" style="padding: 6px 12px; font-size: 13px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">Savatchaga qo'shish</button>
+                </div>
+              </div>
+
+              <div class="cart-items" id="cart-items-container">
+                <div style="text-align: center; color: var(--color-text-secondary); padding: 40px 0;" data-i18n="pos_cart_empty">Savatcha bo'sh.</div>
+              </div>
+              
+              <div class="cart-total-row">
+                <span data-i18n="pos_total">Jami summa</span>
+                <span id="cart-total-value">$0.00</span>
+              </div>
+              
+              <button class="btn-primary" id="checkout-btn" style="margin-top: 16px;" data-i18n="pos_btn_checkout">Sotuvni Tasdiqlash</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2C. WAREHOUSE (OMBORXONA) VIEW -->
+        <section id="view-warehouse" class="tab-view" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="card-title" style="font-size: 18px;" data-i18n="wh_title">Ombor Zaxiralari</h2>
+            <button class="btn-primary admin-only" id="open-add-product-modal" style="width: auto; padding: 10px 20px;" data-i18n="wh_btn_add">Yangi Smartfon Qo'shish</button>
+          </div>
+
+          <!-- Simulated scan for warehouse registration -->
+          <div class="glass-card admin-only" style="padding: 16px; margin-bottom: 24px; border-color: rgba(0, 242, 254, 0.2); max-width: 450px;">
+            <div style="font-size: 13px; margin-bottom: 8px; font-weight: 600;">Skaner orqali yangi smartfon ro'yxatdan o'tkazish</div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="wh-simulated-qr-input" class="neo-input" style="padding: 8px 12px; font-size: 13px;" placeholder="TEL-XXXXX (yoki skanerlang)">
+              <button class="btn-primary" id="wh-sim-scan-btn" style="width: auto; padding: 8px 16px; font-size: 13px;">Skanerlash</button>
+            </div>
+          </div>
+
+          <!-- Skanerlash Arizalari (Incoming Scan Requests) Card -->
+          <div class="glass-card admin-only" id="warehouse-scan-requests-card" style="margin-bottom: 24px; display: none;">
+            <h3 class="card-title text-accent" style="margin-bottom: 16px; font-size: 15px;">
+              <i class="fas fa-mobile-alt" style="margin-right: 8px;"></i>Kelib tushgan skanerlash arizalari
+            </h3>
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+              <table class="neo-table">
+                <thead>
+                  <tr>
+                    <th>Skanerlangan QR kod</th>
+                    <th>Filial (Joylashuv)</th>
+                    <th>Skanerlangan Vaqt</th>
+                    <th>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody id="scan-requests-tbody">
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--color-text-secondary);">Kelib tushgan arizalar yo'q.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="neo-table">
+              <thead>
+                <tr>
+                  <th data-i18n="wh_col_model">Model va Xususiyatlar</th>
+                  <th data-i18n="wh_col_qr">Shtrix / QR Kod</th>
+                  <th data-i18n="wh_col_qty">Mavjud Soni</th>
+                  <th data-i18n="wh_col_purchase">Tannarxi</th>
+                  <th data-i18n="wh_col_retail">Sotish Narxi</th>
+                  <th class="admin-only" id="wh-actions-header" data-i18n="wh_col_actions" style="display: none;">Amallar</th>
+                </tr>
+              </thead>
+              <tbody id="warehouse-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 2D. STAFF MANAGEMENT VIEW -->
+        <section id="view-staff" class="tab-view" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="card-title" style="font-size: 18px;" data-i18n="staff_title">Xodimlar Ro'yxati</h2>
+            <button class="btn-primary" id="open-add-staff-modal" style="width: auto; padding: 10px 20px;" data-i18n="staff_btn_add">Yangi Kassir Qo'shish</button>
+          </div>
+          <div class="table-responsive">
+            <table class="neo-table">
+              <thead>
+                <tr>
+                  <th data-i18n="staff_col_name">Foydalanuvchi</th>
+                  <th data-i18n="staff_col_email">Gmail Manzili</th>
+                  <th data-i18n="staff_col_wage">Ish Haqi (Soatiga)</th>
+                  <th data-i18n="staff_col_shift_status">Smena Holati va Daromad</th>
+                  <th data-i18n="wh_col_actions">Amallar</th>
+                </tr>
+              </thead>
+              <tbody id="staff-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 2EE. BRANCHES / OBJECTS MANAGEMENT VIEW -->
+        <section id="view-branches" class="tab-view" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 class="card-title" style="font-size: 18px;" data-i18n="branches_title">Do'konlar va Ob'yektlar</h2>
+            <button class="btn-primary" id="open-add-branch-modal" style="width: auto; padding: 10px 20px;" data-i18n="branches_btn_add">Yangi Obyekt Qo'shish</button>
+          </div>
+
+          <!-- Branches Cards Grid -->
+          <div class="product-grid" id="branches-list-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); max-height: none; overflow-y: visible; margin-bottom: 24px;">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Selected Branch Details Panel (Hidden by default) -->
+          <div id="selected-branch-details-panel" style="display: none; margin-top: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+              <h3 class="card-title text-accent" id="selected-branch-title" style="font-size: 20px;">Filial nomi</h3>
+              <button class="btn-secondary" id="btn-close-branch-details" style="width: auto; padding: 6px 12px; font-size: 12px;">Yopish</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+              <!-- Left Column: Cashier controls -->
+              <div class="glass-card">
+                <h4 class="card-title" style="margin-bottom: 16px; font-size: 16px;" data-i18n="branch_cashiers_title">Kassirlar va Xavfsizlik</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                  <select id="branch-cashier-select" class="neo-input" style="flex: 1; background: var(--bg-secondary);"></select>
+                  <button class="btn-primary" id="btn-assign-cashier" style="width: auto; padding: 0 16px;" data-i18n="btn_assign">Biriktirish</button>
+                </div>
+                <div class="table-responsive" style="max-height: 250px;">
+                  <table class="neo-table">
+                    <thead>
+                      <tr>
+                        <th data-i18n="staff_col_name">Kassir</th>
+                        <th>PIN</th>
+                        <th>Smena</th>
+                        <th data-i18n="wh_col_actions">Amal</th>
+                      </tr>
+                    </thead>
+                    <tbody id="branch-cashiers-tbody">
+                      <!-- Assigned cashiers list -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Right Column: Dedicated Warehouse Stock -->
+              <div class="glass-card">
+                <h4 class="card-title" style="margin-bottom: 16px; font-size: 16px;" data-i18n="branch_warehouse_title">Filial Tovar Zaxirasi</h4>
+                <div class="table-responsive" style="max-height: 310px;">
+                  <table class="neo-table">
+                    <thead>
+                      <tr>
+                        <th data-i18n="wh_col_model">Model</th>
+                        <th data-i18n="wh_col_qty">Soni</th>
+                        <th>Sotish</th>
+                      </tr>
+                    </thead>
+                    <tbody id="branch-products-tbody">
+                      <!-- Products list -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+
+        <!-- 2EE. CLICK.UZ PAYMENT GATEWAY INTEGRATION -->
+        <section id="view-click-integration" class="tab-view" style="display: none;">
+          <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 15px;">
+              <div style="font-size: 28px; color: #00f2fe;"><i class="fas fa-credit-card"></i></div>
+              <div>
+                <h2 style="font-size: 20px; font-weight: 600; margin: 0; color: #ffffff;">Click.uz To'lov Integratsiyasi</h2>
+                <p style="font-size: 13px; color: var(--color-text-secondary); margin: 4px 0 0 0;">Qachonki Click to'lov tizimini ulamoqchi bo'lsangiz, merchant kalitlarini shu yerda kiriting va faollashtiring.</p>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255,255,255,0.02); padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                <span style="font-weight: 600; color: #ffffff;">Click to'lov tizimini faollashtirish (Active)</span>
+                <input type="checkbox" id="click-active" style="width: 20px; height: 20px; accent-color: #00f2fe; cursor: pointer;">
+              </label>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div class="form-group">
+                <label class="form-label">Merchant ID</label>
+                <input type="text" id="click-merchant-id" class="neo-input" placeholder="e.g. 12345">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Service ID</label>
+                <input type="text" id="click-service-id" class="neo-input" placeholder="e.g. 67890">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div class="form-group">
+                <label class="form-label">Merchant User ID</label>
+                <input type="text" id="click-user-id" class="neo-input" placeholder="e.g. 112233">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Secret Key / API Key</label>
+                <input type="password" id="click-secret-key" class="neo-input" placeholder="••••••••••••••••">
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-bottom: 20px;">
+              <div class="form-group" style="flex: 1;">
+                <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 6px 0;">
+                  <span style="font-size: 13px; color: var(--color-text-secondary);">Sandbox (Test sinov rejimi)</span>
+                  <input type="checkbox" id="click-sandbox" style="width: 16px; height: 16px; accent-color: #00f2fe;">
+                </label>
+              </div>
+            </div>
+
+            <div style="background: rgba(0, 242, 254, 0.03); border: 1px solid rgba(0, 242, 254, 0.15); padding: 15px; border-radius: 10px; margin-bottom: 25px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 13px; color: var(--accent); font-weight: 600;"><i class="fas fa-link" style="margin-right: 6px;"></i> Click Webhook Manzili (URL)</h4>
+              <div style="display: flex; gap: 10px;">
+                <input type="text" class="neo-input" id="click-webhook-url" readonly value="http://127.0.0.1:8000/api/payments/click/webhook" style="font-family: monospace; font-size: 13px; background: rgba(0,0,0,0.2); flex: 1;">
+                <button class="btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('click-webhook-url').value); showToast('Nusxalandi!');" style="width: auto; white-space: nowrap; padding: 0 15px;"><i class="fas fa-copy"></i> Nusxalash</button>
+              </div>
+              <p style="font-size: 11px; color: var(--color-text-secondary); margin: 8px 0 0 0;">Ushbu webhook manzilini Click.uz Merchant kabinetida (Billing / Webhook URL) sozlamalarida ko'rsatishingiz shart.</p>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button class="btn-primary" id="save-click-config-btn" style="width: auto; padding: 12px 30px;"><i class="fas fa-save" style="margin-right: 6px;"></i> Integratsiyani Saqlash</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2F. RECENT ACTIVITIES AUDIT LOG -->
+        <section id="view-activities" class="tab-view" style="display: none;">
+          <div class="glass-card">
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;">
+              <i class="fas fa-history" style="margin-right: 8px;"></i>Tizimdagi Oxirgi Amallar (Sotuvlar va Amallar Auditi)
+            </h3>
+            <p style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 20px;">
+              Ushbu bo'limda tizimda amalga oshirilgan barcha sotuvlar va amallar o'chirilmaydigan (immutable) audit log ko'rinishida vaqti va sanasi bilan saqlanadi.
+            </p>
+            
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+              <table class="neo-table">
+                <thead>
+                  <tr>
+                    <th>Vaqt va Sana</th>
+                    <th>Foydalanuvchi</th>
+                    <th>Amal turi</th>
+                    <th>Tavsif (Batafsil)</th>
+                  </tr>
+                </thead>
+                <tbody id="activities-table-body">
+                  <!-- Dynamically populated -->
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--color-text-secondary);">Amallar yuklanmoqda...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2E. SYSTEM SETTINGS MODULE -->
+        <section id="view-settings" class="tab-view" style="display: none;">
+          <h2 class="card-title" style="font-size: 18px; margin-bottom: 24px;" data-i18n="settings_title">Tizim Sozlamalari</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="glass-card">
+              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_branding_group">Brending Sozlamalari</h3>
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_brand_name">Tizim nomi</label>
+                <input type="text" id="settings-brand-name" class="neo-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_logo_url">Logo URL manzili</label>
+                <input type="text" id="settings-logo-url" class="neo-input">
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_theme_group">Vizual Mavzular va Muhit</h3>
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_accent_color">Urg'u rangi (Accent Color)</label>
+                <input type="color" id="settings-accent-color" class="neo-input" style="height: 40px; padding: 2px; cursor: pointer;">
+              </div>
+              <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label">Dizayn Qolipi (UI Preset)</label>
+                <select id="settings-ui-preset" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                  <option value="glassmorphism">Glassmorphism (Glassmorphic Glow)</option>
+                  <option value="neomorphism">Neomorphism (Neomorphic Matte)</option>
+                  <option value="cyberpunk">Cyberpunk (Cyberpunk Neon Glow)</option>
+                  <option value="minimalist">Minimalist (Minimalist Classic)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label">Muhit & Hissiyot Ranglari (Ambient Mood)</label>
+                <select id="settings-theme-mood" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                  <option value="deep_space">Deep Space (Kosmik qora-ko'k)</option>
+                  <option value="emerald_forest">Emerald Forest (Zumrad yashil)</option>
+                  <option value="sunset_glow">Sunset Glow (Issiq quyosh botishi qizil)</option>
+                  <option value="midnight_indigo">Midnight Indigo (To'q binafsha-indigo)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label">Orqa Fon Tasvirlari / Grid (Pattern)</label>
+                <select id="settings-theme-pattern" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                  <option value="none">Oddiy (Solid Color)</option>
+                  <option value="geometric_grid">Geometrik Panjara (Tech Grid)</option>
+                  <option value="stars_space">Yulduzlar (Stardust Dots)</option>
+                  <option value="diagonal_cyber">Kiber Chiziqlar (Diagonal Tech Stripes)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label">Orqa Fon Rasmi (Background Image)</label>
+                <input type="hidden" id="settings-theme-bg-image">
+                <input type="file" id="settings-theme-bg-file" accept="image/*" style="display: none;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+                  <button type="button" class="btn-primary" id="upload-bg-btn" style="width: auto; padding: 10px 20px;"><i class="fas fa-upload" style="margin-right: 8px;"></i>Rasm yuklash</button>
+                  <button type="button" class="btn-secondary" id="clear-bg-btn" style="width: auto; padding: 10px 20px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);" title="Fon rasmini o'chirish"><i class="fas fa-trash-alt" style="margin-right: 8px;"></i>O'chirish</button>
+                </div>
+                <div id="settings-theme-bg-preview-container" style="margin-top: 10px; display: none; align-items: center; gap: 10px;">
+                  <img id="settings-theme-bg-preview" src="" style="width: 80px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
+                  <span style="font-size: 12px; color: var(--color-text-secondary);">Fon rasmi faol</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label" data-i18n="set_theme_mode">Tun-Kun rejimi (Theme Mode)</label>
+                <select id="settings-theme-mode" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                  <option value="dark">Tun (Dark Mode)</option>
+                  <option value="light">Kun (Light Mode)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_language_group">Tizim Tili (Language)</h3>
+              <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 16px;" data-i18n="set_lang_desc">Interfeysning asosiy tilini belgilang:</div>
+              <div class="lang-selector" style="max-width: 250px;">
+                <button class="lang-btn" data-lang="uz">UZ</button>
+                <button class="lang-btn" data-lang="ru">RU</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card" style="margin-top: 24px;">
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_salary_rules">Ish Haqi Qoidalari</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_hourly_rate">Kassirlar bazaviy soatlik stavkasi ($)</label>
+                <input type="number" id="settings-hourly-rate" class="neo-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_night_multiplier">Tungi shift koeffitsiyenti (X)</label>
+                <input type="number" id="settings-night-multiplier" step="0.1" class="neo-input">
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 16px;">
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_day_start">Kunduzgi shift boshlanishi (Soat 0-23)</label>
+                <input type="number" id="settings-day-start" min="0" max="23" class="neo-input" placeholder="8">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="set_day_end">Kunduzgi shift tugashi (Soat 0-23)</label>
+                <input type="number" id="settings-day-end" min="0" max="23" class="neo-input" placeholder="20">
+              </div>
+            </div>
+            
+            <button class="btn-primary" id="save-settings-btn" style="margin-top: 10px;" data-i18n="btn_save_settings">Sozlamalarni Saqlash</button>
+          </div>
+
+          <!-- Centralized User Accounts & Roles Management -->
+          <div class="glass-card admin-only" style="margin-top: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h3 class="card-title text-accent"><i class="fas fa-users-cog" style="margin-right: 8px;"></i>Tizim Foydalanuvchilari va Rollar</h3>
+              <button class="btn-primary" id="open-add-user-modal" style="width: auto; padding: 6px 16px; font-size: 13px;">Yangi foydalanuvchi qo'shish</button>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="neo-table">
+                <thead>
+                  <tr>
+                    <th>Foydalanuvchi</th>
+                    <th>Gmail (Login)</th>
+                    <th>Rol (Ruxsatlar)</th>
+                    <th>Filial (Joylashuv)</th>
+                    <th>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody id="settings-users-tbody">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2F. DEDICATED MOBILE SCANNER VIEW -->
+        <section id="view-scanner" class="tab-view" style="display: none; padding: 16px; max-width: 600px; margin: 0 auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="pulse-indicator pulse-green" style="background: var(--color-success); width: 8px; height: 8px; border-radius: 50%;"></span>
+              <strong id="scanner-device-name" style="font-size: 14px; color: var(--color-text-secondary);">Skanerlovchi Qurilma</strong>
+            </div>
+            <button class="btn-secondary" id="scanner-logout-btn" style="width: auto; padding: 6px 16px; font-size: 12px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);">Chiqish</button>
+          </div>
+
+          <div class="glass-card" style="text-align: center; margin-bottom: 16px;">
+            <h2 class="card-title text-accent" style="font-size: 20px;"><i class="fas fa-camera" style="margin-right: 8px;"></i>Mobil Kamera Skaneri</h2>
+            <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">Smartfon kamerasi yordamida QR-kod va shtrix-kodlarni o'qing</p>
+          </div>
+
+          <div class="glass-card" style="margin-bottom: 16px;">
+            <div class="form-group">
+              <label class="form-label">Skanerlash maqsadi (Purpose)</label>
+              <select id="scanner-purpose" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                <option value="warehouse">Omborga yangi tovar qo'shish / Yangilash</option>
+                <option value="pos">Sotuv savatchasiga kiritish (POS)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+              <label class="form-label">Mo'ljal filial / Ob'yekt</label>
+              <select id="scanner-branch-id" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Camera Feed Area -->
+          <div class="glass-card" style="padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+            <div id="scanner-camera-feed" style="width: 100%; max-width: 400px; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; position: relative; border: 2px dashed rgba(255,255,255,0.15);">
+              <div id="html5-qr-reader" style="width: 100%; height: 100%;"></div>
+            </div>
+          </div>
+
+          <!-- Scanned Logs / Status -->
+          <div class="glass-card" style="margin-top: 16px;">
+            <h3 class="card-title" style="font-size: 14px; margin-bottom: 12px;">Skanerlash natijalari</h3>
+            <div id="scanner-status" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; font-family: monospace; font-size: 12px; max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+              <div style="color: var(--color-text-secondary);">Kamera skanerlashni kutmoqda...</div>
+            </div>
+          </div>
+        </section>
+      </main>
+      </div> <!-- Closing main-content-wrapper -->
+    </div> <!-- Closing main-shell -->
+
+    <!-- 3. MODALS -->
+    <!-- Product Add/Edit Modal -->
+    <div id="product-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="product-modal-title" data-i18n="modal_add_title">Yangi smartfon qo'shish</h3>
+        </div>
+        <div class="modal-body">
+          <form id="product-form">
+            <input type="hidden" id="product-id">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_model">Smartfon Modeli</label>
+                <input type="text" id="product-model-name" class="neo-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_qr">QR Kod</label>
+                <input type="text" id="product-qr-code" class="neo-input" placeholder="TEL-XXXXX" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_purchase">Sotib Olingan Narxi ($)</label>
+                <input type="number" id="product-purchase-price" step="0.01" class="neo-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_retail">Sotish Narxi ($)</label>
+                <input type="number" id="product-retail-price" step="0.01" class="neo-input" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_qty">Soni</label>
+                <input type="number" id="product-quantity" class="neo-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_size">O'lchami / Hajmi (Size)</label>
+                <input type="text" id="product-size" class="neo-input" placeholder="e.g. 159.9x76.7x8.3 mm">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_ram">RAM (Tezkor Xotira)</label>
+                <input type="text" id="product-ram" class="neo-input" placeholder="e.g. 8GB">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_storage">Storage (Ichki Xotira)</label>
+                <input type="text" id="product-storage" class="neo-input" placeholder="e.g. 256GB">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label class="form-label" data-i18n="field_color">Color (Rangi)</label>
+                <input type="text" id="product-color" class="neo-input" placeholder="e.g. Deep Obsidian">
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+              <label class="form-label" data-i18n="field_branch">Filial / Obyekt (Branch)</label>
+              <select id="product-branch-id" class="neo-input" style="background: var(--bg-secondary);"></select>
+            </div>
+            <div class="form-group" style="margin-top: 12px; border: 1px dashed rgba(0, 242, 254, 0.3); padding: 12px; border-radius: 8px; background: rgba(0, 242, 254, 0.02);">
+              <label class="form-label" style="color: #00f2fe; font-weight: 600;"><i class="fas fa-credit-card" style="margin-right: 6px;"></i>Click To'lov Integratsiyasi</label>
+              <input type="text" id="product-click-url" class="neo-input" placeholder="e.g. https://click.uz/pay/... (Click to'lov havolasi yoki bo'sh qoldiring)">
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 6px;">
+                Mijoz Click orqali to'lashi uchun tayyor to'lov havolasini kiriting. Qachonki integratsiya qilinmoqchi bo'lsa, shu yerga havolani yozish kifoya.
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="close-product-modal" data-i18n="btn_cancel">Bekor qilish</button>
+          <button class="btn-primary" id="save-product-btn" style="width: auto; padding: 10px 24px;" data-i18n="btn_save">Saqlash</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff Add/Edit Modal -->
+    <div id="staff-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="staff-modal-title" data-i18n="modal_add_staff">Yangi Kassir Qo'shish</h3>
+        </div>
+        <div class="modal-body">
+          <form id="staff-form">
+            <input type="hidden" id="staff-id">
+            <div class="form-group">
+              <label class="form-label" data-i18n="field_staff_name">Xodim Ismi</label>
+              <input type="text" id="staff-name" class="neo-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="field_staff_email">Gmail Pochtasi</label>
+              <input type="email" id="staff-email" class="neo-input" placeholder="cashier@gmail.com" required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_staff_pass">Parol</label>
+                <input type="password" id="staff-password" class="neo-input" placeholder="Kamida 6 belgi">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="field_staff_pin">PIN Kod (4 xonali)</label>
+                <input type="text" id="staff-pin" class="neo-input" maxlength="4" placeholder="1234">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="field_staff_wage">Ish Haqi stavkasi ($/soat)</label>
+              <input type="number" id="staff-wage" class="neo-input" step="0.5" required>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+              <label class="form-label" data-i18n="field_branch">Filial / Obyekt (Branch)</label>
+              <select id="staff-branch-id" class="neo-input" style="background: var(--bg-secondary);"></select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="close-staff-modal" data-i18n="btn_cancel">Bekor qilish</button>
+          <button class="btn-primary" id="save-staff-btn" style="width: auto; padding: 10px 24px;" data-i18n="btn_save">Saqlash</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branch Add/Edit Modal -->
+    <div id="branch-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="branch-modal-title" data-i18n="modal_add_branch">Yangi Obyekt Qo'shish</h3>
+        </div>
+        <div class="modal-body">
+          <form id="branch-form">
+            <input type="hidden" id="branch-id">
+            <div class="form-group">
+              <label class="form-label" data-i18n="branch_field_name">Obyekt / Do'kon Nomi</label>
+              <input type="text" id="branch-name" class="neo-input" placeholder="e.g. Yunusobod filiali" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="branch_field_address">Manzili</label>
+              <input type="text" id="branch-address" class="neo-input" placeholder="e.g. Toshkent shahar, Yunusobod tumani">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="close-branch-modal" data-i18n="btn_cancel">Bekor qilish</button>
+          <button class="btn-primary" id="save-branch-btn" style="width: auto; padding: 10px 24px;" data-i18n="btn_save">Saqlash</button>
+        </div>
+      </div>
+    </div>
+    <!-- User Account Add/Edit Modal -->
+    <div id="user-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="user-modal-title">Foydalanuvchi hisobini yaratish</h3>
+        </div>
+        <div class="modal-body">
+          <form id="user-form">
+            <input type="hidden" id="user-modal-id">
+            <div class="form-group">
+              <label class="form-label">Ismi / Qurilma Nomi</label>
+              <input type="text" id="user-modal-name" class="neo-input" required>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+              <label class="form-label">Gmail Manzili (Login)</label>
+              <input type="email" id="user-modal-email" class="neo-input" placeholder="example@gmail.com" required>
+            </div>
+            <div class="form-row" style="margin-top: 12px;">
+              <div class="form-group">
+                <label class="form-label">Tizim Paroli</label>
+                <input type="password" id="user-modal-password" class="neo-input" placeholder="Kamida 6 ta belgi">
+              </div>
+              <div class="form-group" id="user-modal-pin-group">
+                <label class="form-label">PIN Kod (Kassir uchun)</label>
+                <input type="text" id="user-modal-pin" class="neo-input" maxlength="4" placeholder="1234">
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 12px;">
+              <div class="form-group">
+                <label class="form-label">Tizimdagi Roli</label>
+                <select id="user-modal-role" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                  <option value="admin">Administrator</option>
+                  <option value="cashier" selected>Kassir</option>
+                  <option value="scanner">Skanerlovchi qurilma (Mobil)</option>
+                </select>
+              </div>
+              <div class="form-group" id="user-modal-branch-group">
+                <label class="form-label">Filial (Joylashuv)</label>
+                <select id="user-modal-branch-id" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+            <div class="form-group" id="user-modal-wage-group" style="margin-top: 12px;">
+              <label class="form-label">Ish Haqi stavkasi ($/soat)</label>
+              <input type="number" id="user-modal-wage" class="neo-input" step="0.5" value="10">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer" style="margin-top: 20px;">
+          <button class="btn-secondary" id="close-user-modal">Bekor qilish</button>
+          <button class="btn-primary" id="save-user-btn" style="width: auto; padding: 10px 24px;">Saqlash</button>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Click.uz Payment QR Code Modal -->
+    <div id="click-payment-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 420px; text-align: center; padding: 25px;">
+        <div style="font-size: 40px; color: #00f2fe; margin-bottom: 15px;">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <h3 id="click-pay-title" style="font-size: 18px; font-weight: 600; margin-bottom: 6px; color: #ffffff;">Click.uz QR To'lov</h3>
+        <p id="click-pay-subtitle" style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 20px;">Smartphone - $0.00</p>
+        
+        <div style="background: #ffffff; padding: 15px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 20px;">
+          <img id="click-pay-qr" src="" style="width: 220px; height: 220px; display: block;" alt="Click Payment QR Code">
+        </div>
+        
+        <div style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 24px; padding: 0 10px;">
+          Telefoningiz orqali <strong>Click Uzbekistan</strong> ilovasida ushbu QR kodni skanerlang va to'lovni tasdiqlang.
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: center;">
+          <button class="btn-secondary" id="close-click-pay-modal" style="width: auto; padding: 8px 20px;">Yopish</button>
+          <a class="btn-primary" id="click-pay-link" href="#" target="_blank" style="width: auto; padding: 8px 20px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: #000000;"><i class="fas fa-external-link-alt"></i> Havola orqali</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Area -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <script>
+    // Bulletproof periodic layout guard for Cashier vs Admin visibility using exact IDs
+    setInterval(() => {
+      const token = localStorage.getItem('telebar_token');
+      const shell = document.getElementById('main-shell');
+      const dbgTokenSpan = document.getElementById('debug-token');
+      
+      if (dbgTokenSpan) {
+        dbgTokenSpan.innerText = token ? token : 'no-token';
+      }
+
+      const dashLink = document.getElementById('nav-dash');
+      const whLink = document.getElementById('nav-wh');
+      const staffLink = document.getElementById('nav-staff-tab');
+      const branchesLink = document.getElementById('nav-branches-tab');
+      const settingsLink = document.getElementById('nav-set');
+      const addProductBtn = document.getElementById('open-add-product-modal');
+
+      if (token) {
+        const isAdmin = token.includes('admin');
+        if (!isAdmin) {
+          // Cashier Session
+          if (shell) {
+            shell.classList.add('role-cashier');
+            shell.classList.remove('role-admin');
+          }
+          if (dashLink) dashLink.style.setProperty('display', 'none', 'important');
+          if (whLink) whLink.style.removeProperty('display');
+          if (staffLink) staffLink.style.setProperty('display', 'none', 'important');
+          if (branchesLink) branchesLink.style.setProperty('display', 'none', 'important');
+          if (settingsLink) settingsLink.style.setProperty('display', 'none', 'important');
+          if (addProductBtn) addProductBtn.style.setProperty('display', 'none', 'important');
+        } else {
+          // Admin Session
+          if (shell) {
+            shell.classList.add('role-admin');
+            shell.classList.remove('role-cashier');
+          }
+          if (dashLink) dashLink.style.removeProperty('display');
+          if (whLink) whLink.style.removeProperty('display');
+          if (staffLink) staffLink.style.removeProperty('display');
+          if (branchesLink) branchesLink.style.removeProperty('display');
+          if (settingsLink) settingsLink.style.removeProperty('display');
+          if (addProductBtn) addProductBtn.style.removeProperty('display');
+        }
+      } else {
+        // If not logged in, show all in default state
+        if (dashLink) dashLink.style.removeProperty('display');
+        if (whLink) whLink.style.removeProperty('display');
+        if (staffLink) staffLink.style.removeProperty('display');
+        if (branchesLink) branchesLink.style.removeProperty('display');
+        if (settingsLink) settingsLink.style.removeProperty('display');
+        if (addProductBtn) addProductBtn.style.removeProperty('display');
+      }
+    }, 200);
+  </script>
+
+
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+
+
