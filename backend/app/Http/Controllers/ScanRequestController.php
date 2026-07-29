@@ -41,6 +41,14 @@ class ScanRequestController extends Controller
             'status' => 'pending'
         ]);
 
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => $request->user()->id ?? null,
+            'user_name' => $request->user()->name ?? 'Mobil Skaner',
+            'action_type' => 'scan_request',
+            'description' => "Yangi shtrix-kod skanerlandi: {$scanRequest->qr_code} (Omborga kiritish arizasi)",
+        ]);
+
         // Broadcast to websocket if needed
         // (Optional node.js event dispatch could be added here)
 
@@ -70,6 +78,14 @@ class ScanRequestController extends Controller
 
         $scanRequest->status = $request->status;
         $scanRequest->save();
+
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => $request->user()->id ?? null,
+            'user_name' => $request->user()->name ?? 'Tizim',
+            'action_type' => 'scan_update',
+            'description' => "Skanerlash arizasi ko'rib chiqildi: {$scanRequest->qr_code} (" . ($scanRequest->status === 'approved' ? 'Tasdiqlandi' : 'Rad etildi') . ")",
+        ]);
 
         return response()->json([
             'message' => 'Ariza holati yangilandi',

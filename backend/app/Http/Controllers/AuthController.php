@@ -34,6 +34,15 @@ class AuthController extends Controller
         // If they are a cashier, they need to verify their PIN code next.
         if ($user->role === 'admin') {
             $token = $user->createToken('admin-token')->plainTextToken;
+
+            // Log activity
+            \App\Models\ActivityLog::create([
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'action_type' => 'login',
+                'description' => "Tizimga kirildi: {$user->name} (Administrator)",
+            ]);
+
             return response()->json([
                 'message' => 'Admin muvaffaqiyatli tizimga kirdi',
                 'token' => $token,
@@ -89,6 +98,14 @@ class AuthController extends Controller
         // The requirement says: "When a cashier authenticates or credentials are updated, the system automatically terminates..."
         $shiftController = new ShiftController();
         $shift = $shiftController->initializeCashierShift($user);
+
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action_type' => 'login',
+            'description' => "Tizimga kirildi: {$user->name} (Kassir)",
+        ]);
 
         return response()->json([
             'message' => 'Kassir muvaffaqiyatli kirdi',

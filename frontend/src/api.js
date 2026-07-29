@@ -632,6 +632,10 @@ function handleMockRouting(endpoint, method, body) {
     };
     list.push(req);
     localStorage.setItem('mock_scan_requests', JSON.stringify(list));
+    
+    // Log activity
+    logActivityOffline('scan_request', `Yangi shtrix-kod skanerlandi: ${req.qr_code} (Omborga kiritish arizasi) (Demo)`);
+
     return { message: 'Skanerlash arizasi omborga yuborildi (Demo)', scan_request: req };
   }
 
@@ -643,6 +647,10 @@ function handleMockRouting(endpoint, method, body) {
     if (idx !== -1) {
       list[idx].status = body.status;
       localStorage.setItem('mock_scan_requests', JSON.stringify(list));
+      
+      // Log activity
+      logActivityOffline('scan_update', `Skanerlash arizasi ko'rib chiqildi: ${list[idx].qr_code} (${body.status === 'approved' ? 'Tasdiqlandi' : 'Rad etildi'}) (Demo)`);
+
       return { message: 'Ariza holati yangilandi (Demo)', scan_request: list[idx] };
     }
   }
