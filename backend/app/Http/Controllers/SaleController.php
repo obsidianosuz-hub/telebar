@@ -26,11 +26,11 @@ class SaleController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Get current active shift
-        $activeShift = Shift::where('status', 'active')->first();
+        // Get current active shift for this specific cashier user
+        $activeShift = Shift::where('user_id', $request->user()->id)->where('status', 'active')->first();
         if (!$activeShift) {
             return response()->json([
-                'message' => 'Sotuvni amalga oshirish taqiqlangan. Tizimda faol navbatchilik yo\'q. Iltimos PIN kod orqali kiring.'
+                'message' => 'Sotuvni amalga oshirish taqiqlangan. Sizda faol navbatchilik yo\'q. Iltimos PIN kod orqali kiring.'
             ], 403);
         }
 
