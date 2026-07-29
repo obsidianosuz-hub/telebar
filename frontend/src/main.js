@@ -527,8 +527,9 @@ async function loadDashboardData() {
           `;
         }).join('');
       }
+    }
 
-      // Render branch sales doughnut chart
+    // Render branch sales doughnut chart
       const canvas = document.getElementById('branch-sales-chart');
       if (canvas && typeof Chart !== 'undefined') {
         const labels = analytics.branch_breakdown.map(b => b.branch_name);
@@ -577,9 +578,46 @@ async function loadDashboardData() {
           }
         });
       }
-    }
+      // Calculate unified combined statistics
+      const unifiedContainer = document.getElementById('dashboard-unified-summary-container');
+      if (unifiedContainer) {
+        const totalSales = analytics.branch_breakdown.reduce((sum, b) => sum + b.total_sales, 0);
+        const totalDevices = analytics.branch_breakdown.reduce((sum, b) => sum + b.total_devices, 0);
+        const overallAvgTicket = totalDevices > 0 ? (totalSales / totalDevices).toFixed(2) : '0.00';
+        
+        let leaderText = "Hozircha sotuvlar amalga oshirilmagan.";
+        if (totalSales > 0) {
+          const sorted = [...analytics.branch_breakdown].sort((a, b) => b.total_sales - a.total_sales);
+          const leader = sorted[0];
+          const share = ((leader.total_sales / totalSales) * 100).toFixed(1);
+          leaderText = `Eng yuqori savdo ko'rsatkichi <strong>${leader.branch_name}</strong> hisobiga to'g'ri keladi (Jami tushumning <strong>${share}%</strong> ulushi).`;
+        }
 
-    applyTranslations();
+        unifiedContainer.innerHTML = `
+          <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; align-items: center;">
+            <div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Birlashtirilgan Jami Savdo</div>
+              <div style="font-size: 20px; font-weight: 700; color: #10b981; margin-top: 4px;">$${totalSales.toFixed(2)}</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Jami Sotilgan Telefonlar</div>
+              <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;">${totalDevices} ta</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">O'rtacha Birlashgan Check</div>
+              <div style="font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 4px;">$${overallAvgTicket}</div>
+            </div>
+            <div style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 12px; font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 8px;">
+              <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 11px; flex-shrink: 0;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <span>${leaderText}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      applyTranslations();
   } catch (e) {
     showToast(e.message, 'danger');
   }
