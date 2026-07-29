@@ -586,6 +586,37 @@ async function loadDashboardData() {
             cutout: '70%'
           }
         });
+
+        // Render custom legend under the chart showing complete calculations
+        const legendContainer = document.getElementById('chart-legend-container');
+        if (legendContainer) {
+          const totalSales = analytics.branch_breakdown.reduce((sum, b) => sum + b.total_sales, 0);
+          const colors = [
+            accentColor,
+            '#10b981',
+            '#f59e0b',
+            '#3b82f6',
+            '#ec4899',
+            '#8b5cf6'
+          ];
+          
+          legendContainer.innerHTML = analytics.branch_breakdown.map((b, i) => {
+            const share = totalSales > 0 ? ((b.total_sales / totalSales) * 100).toFixed(1) : '0.0';
+            const color = colors[i % colors.length];
+            return `
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: ${color}; display: inline-block;"></span>
+                  <span style="font-weight: 600; color: #ffffff;">${b.branch_name}</span>
+                </div>
+                <div style="text-align: right;">
+                  <strong style="color: #10b981;">$${parseFloat(b.total_sales).toFixed(2)}</strong>
+                  <span style="color: var(--color-text-secondary); margin-left: 6px; font-size: 11px;">(${share}%)</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
       }
       // Calculate unified combined statistics
       const unifiedContainer = document.getElementById('dashboard-unified-summary-container');
