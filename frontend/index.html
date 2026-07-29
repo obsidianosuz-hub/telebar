@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Telebar - Smart POS & Inventory</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div id="app">
@@ -152,8 +153,16 @@
           <!-- Location Breakdown Card -->
           <div class="glass-card" style="margin-top: 24px;">
             <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="dash_location_breakdown">Filiallar va Ob'yektlar bo'yicha sotuv</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;" id="dashboard-location-breakdown">
-              <div style="text-align: center; color: var(--color-text-secondary); padding: 20px;" data-i18n="dash_no_location_sales">Sotuvlar joylashuv bo'yicha tahlil qilinmoqda...</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+              <div style="display: flex; flex-direction: column; gap: 16px;" id="dashboard-location-breakdown">
+                <div style="text-align: center; color: var(--color-text-secondary); padding: 20px;" data-i18n="dash_no_location_sales">Sotuvlar joylashuv bo'yicha tahlil qilinmoqda...</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
+                <h4 style="margin: 0 0 16px 0; font-size: 13px; color: var(--color-text-secondary); text-align: center;">Savdolar Ulushi (Grafikda)</h4>
+                <div style="width: 100%; max-width: 200px; position: relative;">
+                  <canvas id="branch-sales-chart"></canvas>
+                </div>
+              </div>
             </div>
           </div>
 

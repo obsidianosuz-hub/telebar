@@ -9,6 +9,7 @@ let cashierPinInput = '';
 let activeShift = null;
 let currentSettings = null;
 let posProductsList = [];
+let branchSalesChart = null;
 
 // Initialize i18n
 document.addEventListener('DOMContentLoaded', () => {
@@ -525,6 +526,56 @@ async function loadDashboardData() {
             </div>
           `;
         }).join('');
+      }
+
+      // Render branch sales doughnut chart
+      const canvas = document.getElementById('branch-sales-chart');
+      if (canvas && typeof Chart !== 'undefined') {
+        const labels = analytics.branch_breakdown.map(b => b.branch_name);
+        const data = analytics.branch_breakdown.map(b => b.total_sales);
+        
+        if (branchSalesChart) {
+          branchSalesChart.destroy();
+        }
+        
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00f2fe';
+        
+        branchSalesChart = new Chart(canvas, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: data,
+              backgroundColor: [
+                accentColor,
+                '#10b981',
+                '#f59e0b',
+                '#3b82f6',
+                '#ec4899',
+                '#8b5cf6'
+              ],
+              borderWidth: 0,
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return ` ${context.label}: $${parseFloat(context.raw).toFixed(2)}`;
+                  }
+                }
+              }
+            },
+            cutout: '70%'
+          }
+        });
       }
     }
 
