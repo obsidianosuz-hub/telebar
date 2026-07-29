@@ -149,16 +149,29 @@ async function submitPinCode() {
         
         // Seed active shift clock transition
         const trans = JSON.parse(localStorage.getItem('mock_transitions') || '[]');
+        const shiftType = new Date().getHours() >= 8 && new Date().getHours() < 20 ? 'day' : 'night';
         trans.unshift({
           id: 'trans-' + Date.now(),
           cashier: 'Kassir Demo',
-          type: new Date().getHours() >= 8 && new Date().getHours() < 20 ? 'day' : 'night',
+          type: shiftType,
           status: 'active',
           duration: 'Davom etmoqda',
           revenue: 0.0,
           time: new Date().toISOString()
         });
         localStorage.setItem('mock_transitions', JSON.stringify(trans));
+
+        // Log activity
+        const mockLogs = JSON.parse(localStorage.getItem('mock_activity_logs') || '[]');
+        mockLogs.unshift({
+          id: 'log-' + Date.now(),
+          user_id: 'mock-cashier-id',
+          user_name: 'Kassir Demo',
+          action_type: 'shift_start',
+          description: `Yangi navbatchilik boshlandi: Kassir Demo (${shiftType === 'day' ? 'Kunduzgi' : 'Tungi'} navbatchilik) (Demo)`,
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem('mock_activity_logs', JSON.stringify(mockLogs.slice(0, 100)));
 
         loginSuccess(currentUser);
         showToast('Kassir offline demo rejimda kirdi');

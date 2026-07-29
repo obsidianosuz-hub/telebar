@@ -41,6 +41,14 @@ class ShiftController extends Controller
             $shift->calculated_wage = $hours * $baseRate * $multiplier;
             $shift->save();
 
+            // Log activity
+            \App\Models\ActivityLog::create([
+                'user_id' => $shift->user_id,
+                'user_name' => $shift->user->name ?? 'Kassir',
+                'action_type' => 'shift_end',
+                'description' => "Navbatchilik yakunlandi: " . ($shift->user->name ?? 'Kassir') . " (Kassa tushumi: \$" . number_format($revenue, 2) . ")",
+            ]);
+
             // Send telemetry event to Node.js
             $this->sendTelemetry('shift:completed', [
                 'shift_id' => $shift->id,
@@ -84,6 +92,14 @@ class ShiftController extends Controller
             'generated_revenue' => 0.00,
             'calculated_wage' => 0.00,
             'status' => 'active'
+        ]);
+
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action_type' => 'shift_start',
+            'description' => "Yangi navbatchilik boshlandi: {$user->name} (" . ($shift->shift_type === 'day' ? 'Kunduzgi' : 'Tungi') . " navbatchilik)",
         ]);
 
         // 4. Send telemetry event to Node.js

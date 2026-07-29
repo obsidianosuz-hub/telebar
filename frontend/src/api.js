@@ -282,6 +282,9 @@ function handleMockRouting(endpoint, method, body) {
     currentSettings[body.key] = body.value;
     localStorage.setItem('mock_settings', JSON.stringify(currentSettings));
     
+    // Log activity
+    logActivityOffline('settings_update', `Tizim sozlamalari yangilandi: '${body.key}' bo'limi tahrirlandi (Demo)`);
+
     // Broadcast event to Socket.io if connected
     const socket = getSocket();
     if (socket && socket.connected) {

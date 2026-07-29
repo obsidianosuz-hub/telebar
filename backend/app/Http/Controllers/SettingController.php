@@ -70,6 +70,14 @@ class SettingController extends Controller
             ['value' => $request->value]
         );
 
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => $request->user()->id ?? null,
+            'user_name' => $request->user()->name ?? 'Tizim',
+            'action_type' => 'settings_update',
+            'description' => "Tizim sozlamalari yangilandi: '{$request->key}' bo'limi tahrirlandi",
+        ]);
+
         // Notify client nodes of real-time branding/theme shifts
         $this->notifySettingsChange($setting);
 
