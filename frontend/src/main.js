@@ -708,21 +708,21 @@ async function loadDashboardData() {
         }
 
         unifiedContainer.innerHTML = `
-          <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; align-items: center;">
-            <div>
-              <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Birlashtirilgan Jami Savdo</div>
-              <div style="font-size: 20px; font-weight: 700; color: #10b981; margin-top: 4px;">$${totalSales.toFixed(2)}</div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.05);">
+              <span style="font-size: 12px; color: var(--color-text-secondary);">Jami Birlashgan Savdo:</span>
+              <strong style="font-size: 15px; color: #10b981;">$${totalSales.toFixed(2)}</strong>
             </div>
-            <div>
-              <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Jami Sotilgan Telefonlar</div>
-              <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;">${totalDevices} ta</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.05);">
+              <span style="font-size: 12px; color: var(--color-text-secondary);">Jami Sotilgan Telefonlar:</span>
+              <strong style="font-size: 15px; color: #ffffff;">${totalDevices} ta</strong>
             </div>
-            <div>
-              <div style="font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">O'rtacha Birlashgan Check</div>
-              <div style="font-size: 20px; font-weight: 700; color: var(--accent); margin-top: 4px;">$${overallAvgTicket}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.05);">
+              <span style="font-size: 12px; color: var(--color-text-secondary);">O'rtacha Check (Tizim):</span>
+              <strong style="font-size: 15px; color: var(--accent);">$${overallAvgTicket}</strong>
             </div>
-            <div style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 12px; font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 8px;">
-              <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 11px; flex-shrink: 0;">
+            <div style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; display: flex; align-items: start; gap: 8px; margin-top: 6px;">
+              <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(16,185,129,0.1); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 10px; flex-shrink: 0; margin-top: 2px;">
                 <i class="fas fa-chart-line"></i>
               </div>
               <span>${leaderText}</span>

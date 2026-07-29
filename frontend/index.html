@@ -167,23 +167,27 @@
 
           <!-- Location Breakdown Card -->
           <div class="glass-card" style="margin-top: 24px;">
-            <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="dash_location_breakdown">Filiallar va Ob'yektlar bo'yicha sotuv</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
-              <div style="display: flex; flex-direction: column; gap: 16px;" id="dashboard-location-breakdown">
-                <div style="text-align: center; color: var(--color-text-secondary); padding: 20px;" data-i18n="dash_no_location_sales">Sotuvlar joylashuv bo'yicha tahlil qilinmoqda...</div>
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="dash_location_breakdown">Filiallar va Ob'yektlar bo'yicha tahlil</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: start;">
+              <!-- Left Column: Individual Branch Stats -->
+              <div style="display: flex; flex-direction: column; gap: 16px;">
+                <h4 style="margin: 0; font-size: 13px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Alohida ob'yektlar statistikasi</h4>
+                <div style="display: flex; flex-direction: column; gap: 16px;" id="dashboard-location-breakdown">
+                  <div style="text-align: center; color: var(--color-text-secondary); padding: 20px;" data-i18n="dash_no_location_sales">Sotuvlar joylashuv bo'yicha tahlil qilinmoqda...</div>
+                </div>
               </div>
-              <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
-                <h4 style="margin: 0 0 16px 0; font-size: 13px; color: var(--color-text-secondary); text-align: center;">Savdolar Ulushi (Grafikda)</h4>
-                <div style="width: 100%; max-width: 200px; position: relative;">
+              
+              <!-- Right Column: Combined Overall Stats -->
+              <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+                <h4 style="margin: 0; font-size: 13px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; text-align: center;">Birlashtirilgan Umumiy Hisob-kitob</h4>
+                <div style="width: 100%; height: 180px; position: relative; margin: 0 auto;">
                   <canvas id="branch-sales-chart"></canvas>
                 </div>
-                <div id="chart-legend-container" style="width: 100%; margin-top: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
+                <div id="chart-legend-container" style="width: 100%; font-size: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
+                <div id="dashboard-unified-summary-container" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
+                  <!-- Dynamically populated -->
+                </div>
               </div>
-            </div>
-            
-            <!-- Unified Combined Analysis Section -->
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);" id="dashboard-unified-summary-container">
-              <!-- Dynamically populated -->
             </div>
           </div>
 
