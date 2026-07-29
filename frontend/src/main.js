@@ -494,17 +494,33 @@ async function loadDashboardData() {
         const maxSales = Math.max(...analytics.branch_breakdown.map(b => b.total_sales), 1);
         locContainer.innerHTML = analytics.branch_breakdown.map(b => {
           const pct = Math.min((b.total_sales / maxSales) * 100, 100);
+          const avgTicket = b.total_devices > 0 ? (b.total_sales / b.total_devices).toFixed(2) : '0.00';
+          
           return `
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-              <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 14px;">
-                <span>${b.branch_name}</span>
-                <span style="color: var(--accent);">$${parseFloat(b.total_sales).toFixed(2)}</span>
+            <div class="branch-stat-card" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); transition: transform 0.2s ease;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(0,242,254,0.08); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 16px;">
+                    <i class="fas fa-store"></i>
+                  </div>
+                  <span style="font-weight: 600; font-size: 15px; color: #ffffff;">${b.branch_name}</span>
+                </div>
+                <span style="color: #10b981; font-weight: 700; font-size: 16px;">$${parseFloat(b.total_sales).toFixed(2)}</span>
               </div>
-              <div style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden;">
+              
+              <div style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 4px; overflow: hidden; margin: 4px 0;">
                 <div style="background: var(--accent-gradient); width: ${pct}%; height: 100%; border-radius: 4px; box-shadow: var(--accent-glow);"></div>
               </div>
-              <div style="font-size: 11px; color: var(--color-text-secondary); text-align: right;">
-                Sotilgan qurilmalar: <strong>${b.total_devices} ta</strong>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                <div>
+                  <span style="color: var(--color-text-secondary);">Sotilgan:</span>
+                  <strong style="color: #ffffff; margin-left: 4px;">${b.total_devices} ta</strong>
+                </div>
+                <div style="text-align: right;">
+                  <span style="color: var(--color-text-secondary);">O'rtacha check:</span>
+                  <strong style="color: var(--accent); margin-left: 4px;">$${avgTicket}</strong>
+                </div>
               </div>
             </div>
           `;

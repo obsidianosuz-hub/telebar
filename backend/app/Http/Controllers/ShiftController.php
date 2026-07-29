@@ -162,21 +162,38 @@ class ShiftController extends Controller
                 ];
             });
 
-        // Group sales by branch
-        $branchBreakdown = \DB::table('sales')
-            ->join('shifts', 'sales.shift_id', '=', 'shifts.id')
-            ->join('users', 'shifts.user_id', '=', 'users.id')
-            ->leftJoin('branches', 'users.branch_id', '=', 'branches.id')
-            ->select('branches.name as branch_name', \DB::raw('SUM(sales.total_price) as total_sales'), \DB::raw('COUNT(sales.id) as total_devices'))
-            ->groupBy('branches.name')
-            ->get()
-            ->map(function ($b) {
-                return [
-                    'branch_name' => $b->branch_name ?? 'Asosiy Omborxona / Boshqa',
-                    'total_sales' => (float)$b->total_sales,
-                    'total_devices' => (int)$b->total_devices
-                ];
-            });
+        // Group sales by branch including all branches (even with 0 sales)
+        $allBranches = \App\Models\Branch::all();
+        $branchBreakdown = $allBranches->map(function ($b) {
+            $userIds = \App\Models\User::where('branch_id', $b->id)->pluck('id');
+            $shiftIds = Shift::whereIn('user_id', $userIds)->pluck('id');
+            
+            $totalSales = Sale::whereIn('shift_id', $shiftIds)->sum('total_price');
+            $totalDevices = Sale::whereIn('shift_id', $shiftIds)->sum('quantity');
+            
+            return [
+                'branch_name' => $b->name,
+                'total_sales' => (float)$totalSales,
+                'total_devices' => (int)$totalDevices
+            ];
+        });
+
+        // Add main warehouse / headquarters if sales exist without a linked branch
+        $nullBranchSales = Sale::whereNotExists(function ($query) {
+            $query->select(\DB::raw(1))
+                  ->from('shifts')
+                  ->join('users', 'shifts.user_id', '=', 'users.id')
+                  ->whereRaw('sales.shift_id = shifts.id')
+                  ->whereNotNull('users.branch_id');
+        });
+
+        if ($nullBranchSales->count() > 0) {
+            $branchBreakdown->push([
+                'branch_name' => 'Bosh qarorgoh / Ombor',
+                'total_sales' => (float)$nullBranchSales->sum('total_price'),
+                'total_devices' => (int)$nullBranchSales->sum('quantity')
+            ]);
+        }
 
         // Group transitions and metrics by employee
         $staffStats = User::whereIn('role', ['cashier', 'admin'])
