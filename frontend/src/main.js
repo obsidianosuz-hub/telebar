@@ -10,6 +10,7 @@ let activeShift = null;
 let currentSettings = null;
 let posProductsList = [];
 let branchSalesChart = null;
+let financialSummaryChart = null;
 
 // Initialize i18n
 document.addEventListener('DOMContentLoaded', () => {
@@ -413,6 +414,79 @@ async function loadDashboardData() {
       `;
     } else {
       document.getElementById('stat-shift').innerText = "Faol emas";
+    }
+
+    // Render Main Financial Summary Chart
+    const finCanvas = document.getElementById('financial-summary-chart');
+    if (finCanvas && typeof Chart !== 'undefined') {
+      const revenue = parseFloat(analytics.total_revenue);
+      const expenses = parseFloat(analytics.total_expenses || 0);
+      const netProfit = revenue - expenses;
+      
+      if (financialSummaryChart) {
+        financialSummaryChart.destroy();
+      }
+      
+      const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00f2fe';
+      
+      financialSummaryChart = new Chart(finCanvas, {
+        type: 'bar',
+        data: {
+          labels: ['Tushum (Kirgan)', 'Chiqim (Chiqqan)', 'Sof Foyda'],
+          datasets: [{
+            data: [revenue, expenses, netProfit],
+            backgroundColor: [
+              accentColor,
+              '#ef4444',
+              netProfit >= 0 ? '#10b981' : '#ef4444'
+            ],
+            borderRadius: 8,
+            borderWidth: 0,
+            barThickness: 45
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` $${parseFloat(context.raw).toFixed(2)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)'
+              },
+              ticks: {
+                color: 'var(--color-text-secondary)',
+                callback: function(value) {
+                  return '$' + value;
+                }
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#ffffff',
+                font: {
+                  weight: '600'
+                }
+              }
+            }
+          }
+        }
+      });
     }
 
     // Load transition logs
