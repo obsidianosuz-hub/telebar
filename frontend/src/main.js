@@ -391,6 +391,15 @@ async function loadDashboardData() {
     
     document.getElementById('stat-revenue').innerText = `$${parseFloat(analytics.total_revenue).toFixed(2)}`;
     document.getElementById('stat-expenses').innerText = `$${parseFloat(analytics.total_expenses || 0).toFixed(2)}`;
+    
+    // Calculate and display Net Profit
+    const profit = parseFloat(analytics.total_revenue) - parseFloat(analytics.total_expenses || 0);
+    const profitEl = document.getElementById('stat-profit');
+    if (profitEl) {
+      profitEl.innerText = `$${profit.toFixed(2)}`;
+      profitEl.style.color = profit >= 0 ? '#10b981' : 'var(--color-danger)';
+    }
+
     document.getElementById('stat-inventory').innerText = `$${parseFloat(analytics.inventory_valuation).toFixed(2)}`;
     document.getElementById('day-shift-val').innerText = `$${parseFloat(analytics.day_shift_revenue).toFixed(2)}`;
     document.getElementById('night-shift-val').innerText = `$${parseFloat(analytics.night_shift_revenue).toFixed(2)}`;
