@@ -87,9 +87,9 @@ class SaleController extends Controller
                 
                 \App\Models\ActivityLog::create([
                     'user_id' => $request->user()->id ?? null,
-                    'user_name' => $request->user()->name ?? 'Tizim',
+                    'user_name' => ($request->user()->name ?? 'Tizim') . ($request->user() ? ' (' . $request->user()->role . ')' : ''),
                     'action_type' => 'sale',
-                    'description' => "Sotuv amalga oshirildi: {$itemNames} (Jami: \$" . number_format($grandTotal, 2) . ")",
+                    'description' => "[Sotuv: {$itemNames}] Sotuv amalga oshirildi (Jami: \$" . number_format($grandTotal, 2) . ")",
                 ]);
             });
 

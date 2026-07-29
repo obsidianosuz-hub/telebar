@@ -81,9 +81,9 @@ class ProductController extends Controller
         // Log activity
         \App\Models\ActivityLog::create([
             'user_id' => $request->user()->id ?? null,
-            'user_name' => $request->user()->name ?? 'Tizim',
+            'user_name' => ($request->user()->name ?? 'Tizim') . ($request->user() ? ' (' . $request->user()->role . ')' : ''),
             'action_type' => 'product_create',
-            'description' => "Yangi mahsulot omborga qo'shildi: {$product->model_name} (Soni: {$product->quantity} dona, Narxi: \$" . number_format($product->retail_price, 2) . ")",
+            'description' => "[Mahsulot: {$product->model_name}] Yangi mahsulot omborga qo'shildi (Soni: {$product->quantity} dona, Narxi: \$" . number_format($product->retail_price, 2) . ")",
         ]);
 
         // Notify realtime system of new stock
@@ -124,9 +124,9 @@ class ProductController extends Controller
         // Log activity
         \App\Models\ActivityLog::create([
             'user_id' => $request->user()->id ?? null,
-            'user_name' => $request->user()->name ?? 'Tizim',
+            'user_name' => ($request->user()->name ?? 'Tizim') . ($request->user() ? ' (' . $request->user()->role . ')' : ''),
             'action_type' => 'product_update',
-            'description' => "Mahsulot ma'lumotlari yangilandi: {$product->model_name} (Yangi soni: {$product->quantity} dona, Yangi narxi: \$" . number_format($product->retail_price, 2) . ")",
+            'description' => "[Mahsulot: {$product->model_name}] Mahsulot ma'lumotlari yangilandi (Yangi soni: {$product->quantity} dona, Yangi narxi: \$" . number_format($product->retail_price, 2) . ")",
         ]);
 
         // Notify realtime system of stock update
@@ -153,9 +153,9 @@ class ProductController extends Controller
         // Log activity
         \App\Models\ActivityLog::create([
             'user_id' => request()->user()->id ?? null,
-            'user_name' => request()->user()->name ?? 'Tizim',
+            'user_name' => (request()->user()->name ?? 'Tizim') . (request()->user() ? ' (' . request()->user()->role . ')' : ''),
             'action_type' => 'product_delete',
-            'description' => "Mahsulot o'chirildi: {$product->model_name} (Shtrixkod: {$product->qr_code})",
+            'description' => "[Mahsulot: {$product->model_name}] Mahsulot o'chirildi (Shtrixkod: {$product->qr_code})",
         ]);
 
         return response()->json(['message' => 'Mahsulot o\'chirildi'], 200);

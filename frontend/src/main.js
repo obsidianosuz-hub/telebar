@@ -2509,13 +2509,15 @@ async function loadActivityLogs() {
     const logs = await request('/activity-logs', 'GET');
     
     if (logs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--color-text-secondary);">Oxirgi amallar topilmadi</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--color-text-secondary);">Oxirgi amallar topilmadi</td></tr>`;
       return;
     }
 
     tbody.innerHTML = logs.map(log => {
       const date = new Date(log.created_at).toLocaleString();
       let typeBadge = '';
+      
+      // Map badge based on action_type
       if (log.action_type === 'sale') {
         typeBadge = `<span style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-shopping-cart"></i> Sotuv</span>`;
       } else if (log.action_type === 'product_create') {
@@ -2524,8 +2526,25 @@ async function loadActivityLogs() {
         typeBadge = `<span style="font-size:11px;background:rgba(245,158,11,0.1);color:#f59e0b;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-edit"></i> Tahrir</span>`;
       } else if (log.action_type === 'product_delete') {
         typeBadge = `<span style="font-size:11px;background:rgba(239,68,68,0.1);color:#ef4444;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-trash-alt"></i> O'chirish</span>`;
+      } else if (log.action_type === 'scan_request') {
+        typeBadge = `<span style="font-size:11px;background:rgba(167,139,250,0.1);color:#a78bfa;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-barcode"></i> Skaner</span>`;
+      } else if (log.action_type === 'scan_update') {
+        typeBadge = `<span style="font-size:11px;background:rgba(45,212,191,0.1);color:#2dd4bf;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-check-double"></i> Tasdiqlash</span>`;
+      } else if (log.action_type === 'login') {
+        typeBadge = `<span style="font-size:11px;background:rgba(56,189,248,0.1);color:#38bdf8;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-sign-in-alt"></i> Kirish</span>`;
+      } else if (log.action_type === 'shift_start' || log.action_type === 'shift_end') {
+        typeBadge = `<span style="font-size:11px;background:rgba(251,113,133,0.1);color:#fb7185;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-user-clock"></i> Smena</span>`;
       } else {
         typeBadge = `<span style="font-size:11px;background:rgba(255,255,255,0.1);color:#ffffff;padding:4px 8px;border-radius:6px;font-weight:600;">Tizim</span>`;
+      }
+
+      // Parse target object and description from [Ob'yekt] formatting
+      let targetObj = 'Tizim';
+      let cleanDesc = log.description;
+      const match = log.description.match(/^\[(.*?)\]\s*(.*)$/);
+      if (match) {
+        targetObj = match[1];
+        cleanDesc = match[2];
       }
 
       return `
@@ -2533,7 +2552,8 @@ async function loadActivityLogs() {
           <td><code style="color:var(--color-text-secondary);">${date}</code></td>
           <td><strong>${log.user_name}</strong></td>
           <td>${typeBadge}</td>
-          <td><span style="font-size:12px;color:var(--color-text-secondary);">${log.description}</span></td>
+          <td><span class="badge-accent" style="font-size:12px; font-weight:600; padding:2px 6px; border-radius:4px; background:rgba(255,255,255,0.05); color:var(--accent); border:1px solid rgba(255,255,255,0.08);">${targetObj}</span></td>
+          <td><span style="font-size:12px;color:var(--color-text-secondary);">${cleanDesc}</span></td>
         </tr>
       `;
     }).join('');
