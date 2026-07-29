@@ -411,7 +411,7 @@ async function loadDashboardData() {
       logContainer.innerHTML = `<div style="text-align:center;color:var(--color-text-secondary);padding-top:40px;" data-i18n="dash_no_shifts">Hozircha o'tishlar qayd etilmagan</div>`;
     } else {
       logContainer.innerHTML = analytics.transitions.map(log => `
-        <div style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:between;align-items:center;">
+        <div style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-weight:500;">${log.cashier} (${log.type === 'day' ? 'Kunduzgi' : 'Tungi'})</div>
             <div style="font-size:12px;color:var(--color-text-secondary);">${new Date(log.time).toLocaleTimeString()}</div>
@@ -425,6 +425,35 @@ async function loadDashboardData() {
           </div>
         </div>
       `).join('');
+    }
+
+    // Load Staff Stats table
+    const staffTbody = document.getElementById('dashboard-staff-tbody');
+    if (staffTbody) {
+      if (!analytics.staff_stats || analytics.staff_stats.length === 0) {
+        staffTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-secondary);">Xodimlar topilmadi</td></tr>`;
+      } else {
+        staffTbody.innerHTML = analytics.staff_stats.map(staff => {
+          const statusBadge = staff.status === 'active' 
+            ? `<span style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 8px;border-radius:6px;font-weight:600;"><i class="fas fa-circle" style="font-size:8px;margin-right:4px;"></i> Faol smenada</span>`
+            : `<span style="font-size:11px;background:rgba(255,255,255,0.05);color:var(--color-text-secondary);padding:4px 8px;border-radius:6px;font-weight:600;">Smenada emas</span>`;
+          
+          const roleBadge = staff.role === 'admin'
+            ? `<span style="font-size:11px;background:rgba(59,130,246,0.1);color:#3b82f6;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:500;">Admin</span>`
+            : `<span style="font-size:11px;background:rgba(245,158,11,0.1);color:#f59e0b;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:500;">Kassir</span>`;
+
+          return `
+            <tr>
+              <td><strong>${staff.name}</strong> ${roleBadge}</td>
+              <td><span style="font-size:12px;color:var(--color-text-secondary);">${staff.email}</span></td>
+              <td style="color:#10b981;font-weight:600;">$${parseFloat(staff.total_revenue).toFixed(2)}</td>
+              <td><strong>${staff.total_hours} soat</strong></td>
+              <td style="color:var(--accent);font-weight:600;">$${parseFloat(staff.total_wage).toFixed(2)}</td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
 
     // Fetch and Load Sales History

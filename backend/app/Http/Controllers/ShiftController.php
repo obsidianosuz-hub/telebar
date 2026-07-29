@@ -178,6 +178,36 @@ class ShiftController extends Controller
                 ];
             });
 
+        // Group transitions and metrics by employee
+        $staffStats = User::whereIn('role', ['cashier', 'admin'])
+            ->get()
+            ->map(function ($u) {
+                // Get all shifts of this user
+                $userShifts = Shift::where('user_id', $u->id)->get();
+                $totalWage = $userShifts->where('status', 'completed')->sum('calculated_wage');
+                $totalRevenue = $userShifts->sum('generated_revenue');
+                
+                $totalMinutes = $userShifts->reduce(function ($carry, $s) {
+                    if ($s->end_time) {
+                        return $carry + $s->start_time->diffInMinutes($s->end_time);
+                    }
+                    return $carry;
+                }, 0);
+                
+                $hasActiveShift = $userShifts->where('status', 'active')->first();
+                
+                return [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'role' => $u->role,
+                    'email' => $u->email,
+                    'total_revenue' => (float)$totalRevenue,
+                    'total_wage' => (float)$totalWage,
+                    'total_hours' => round($totalMinutes / 60.0, 1),
+                    'status' => $hasActiveShift ? 'active' : 'inactive',
+                ];
+            });
+
         return response()->json([
             'total_revenue' => $totalRevenue,
             'total_expenses' => $totalExpenses,
@@ -185,7 +215,8 @@ class ShiftController extends Controller
             'day_shift_revenue' => $dayShiftRevenue,
             'night_shift_revenue' => $nightShiftRevenue,
             'transitions' => $transitions,
-            'branch_breakdown' => $branchBreakdown
+            'branch_breakdown' => $branchBreakdown,
+            'staff_stats' => $staffStats
         ], 200);
     }
 

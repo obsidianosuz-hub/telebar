@@ -511,6 +511,24 @@ function handleMockRouting(endpoint, method, body) {
       total_devices: Math.ceil(sales.length * (b.id === 'branch-1' ? 0.65 : 0.35))
     }));
 
+    const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
+    const staffStats = staff.map(s => {
+      const userShifts = transitions.filter(t => t.cashier === s.name);
+      const totalWage = userShifts.reduce((acc, t) => acc + (parseFloat(t.wage) || 0), 0);
+      const totalRevenue = userShifts.reduce((acc, t) => acc + (parseFloat(t.revenue) || 0), 0);
+      const hasActive = userShifts.some(t => t.status === 'active');
+      return {
+        id: s.id,
+        name: s.name,
+        role: 'cashier',
+        email: s.email || `${s.name.toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+        total_revenue: totalRevenue,
+        total_wage: totalWage,
+        total_hours: userShifts.length * 8,
+        status: hasActive ? 'active' : 'inactive'
+      };
+    });
+
     return {
       total_revenue: totalRevenue,
       total_expenses: totalExpenses,
@@ -518,7 +536,8 @@ function handleMockRouting(endpoint, method, body) {
       day_shift_revenue: totalRevenue * 0.6,
       night_shift_revenue: totalRevenue * 0.4,
       transitions: transitions,
-      branch_breakdown: branchBreakdown
+      branch_breakdown: branchBreakdown,
+      staff_stats: staffStats
     };
   }
 
