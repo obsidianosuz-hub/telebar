@@ -21,14 +21,35 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   setupSidebarDragAndDrop();
 
-  // Server IP Settings Toggle & Save
+  // Server IP & Mode Settings Toggle & Save
   const toggleBtn = document.getElementById('toggle-server-settings');
   const panel = document.getElementById('server-settings-panel');
+  const modeSelect = document.getElementById('system-mode-select');
+  const ipGroup = document.getElementById('server-ip-group');
   const ipInput = document.getElementById('server-ip-input');
   const saveBtn = document.getElementById('save-server-ip-btn');
   
-  if (toggleBtn && panel && ipInput && saveBtn) {
+  if (toggleBtn && panel && modeSelect && ipGroup && ipInput && saveBtn) {
+    const isWebView = window.location.protocol === 'file:';
+    const defaultMode = isWebView ? 'offline' : 'online';
+    const savedMode = localStorage.getItem('telebar_system_mode') || defaultMode;
+    modeSelect.value = savedMode;
+    
+    if (savedMode === 'online') {
+      ipGroup.style.display = 'block';
+    } else {
+      ipGroup.style.display = 'none';
+    }
+    
     ipInput.value = localStorage.getItem('telebar_server_ip') || '';
+    
+    modeSelect.addEventListener('change', () => {
+      if (modeSelect.value === 'online') {
+        ipGroup.style.display = 'block';
+      } else {
+        ipGroup.style.display = 'none';
+      }
+    });
     
     toggleBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -36,14 +57,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     saveBtn.addEventListener('click', () => {
+      const mode = modeSelect.value;
       const ip = ipInput.value.trim();
-      if (ip) {
+      
+      localStorage.setItem('telebar_system_mode', mode);
+      if (mode === 'online' && ip) {
         localStorage.setItem('telebar_server_ip', ip);
-        showToast("Server IP manzili saqlandi! Ilovani qayta yuklang.", 'success');
+        showToast("Tizim tarmoq rejimiga o'tkazildi va server manzili saqlandi!", 'success');
       } else {
         localStorage.removeItem('telebar_server_ip');
-        showToast("Server manzili standart (localhost) holatga qaytarildi!", 'success');
+        showToast("Tizim telefonda mustaqil (offline) ishlash rejimiga o'tkazildi!", 'success');
       }
+      
       setTimeout(() => {
         window.location.reload();
       }, 1000);

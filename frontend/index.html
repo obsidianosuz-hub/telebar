@@ -58,17 +58,24 @@
           </div>
         </div>
 
-        <!-- Server IP Settings (For Mobile WebView APK connection) -->
+        <!-- Server & Offline Mode Settings -->
         <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 15px; text-align: center;">
           <a href="#" id="toggle-server-settings" style="font-size: 12px; color: var(--color-text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-            <i class="fas fa-server"></i> Server sozlamalari
+            <i class="fas fa-server"></i> Tizim ulanish sozlamalari
           </a>
           <div id="server-settings-panel" style="display: none; margin-top: 12px; text-align: left;">
-            <div class="form-group" style="margin-bottom: 8px;">
-              <label class="form-label" style="font-size: 11px;">Server IP manzili (Masalan: 192.168.1.10)</label>
-              <input type="text" id="server-ip-input" class="neo-input" style="font-size: 12px; padding: 8px 12px;" placeholder="localhost">
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 11px;">Dasturning ishlash rejimi</label>
+              <select id="system-mode-select" class="neo-input" style="font-size: 12px; padding: 8px; width: 100%; background: var(--bg-secondary); border-color: rgba(255,255,255,0.1);">
+                <option value="offline">Telefonda mustaqil ishlash (Offline Baza)</option>
+                <option value="online">Kompyuter serveriga ulanish (Real-Time Tarmoq)</option>
+              </select>
             </div>
-            <button type="button" id="save-server-ip-btn" class="btn-primary" style="font-size: 11px; padding: 6px 12px; width: auto;">Saqlash</button>
+            <div class="form-group" id="server-ip-group" style="display: none; margin-bottom: 8px;">
+              <label class="form-label" style="font-size: 11px;">Kompyuter IP manzili (Server IP)</label>
+              <input type="text" id="server-ip-input" class="neo-input" style="font-size: 12px; padding: 8px 12px;" placeholder="10.0.2.2">
+            </div>
+            <button type="button" id="save-server-ip-btn" class="btn-primary" style="font-size: 11px; padding: 6px 12px; width: auto;">Saqlash va yangilash</button>
           </div>
         </div>
       </div>
