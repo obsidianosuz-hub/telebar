@@ -23,16 +23,23 @@ export function setToken(newToken) {
 /**
  * Standard HTTP Request handler to Laravel Backend
  */
-// LocalStorage Mock Data Initializers
+// Force update default database imports on first run
+if (!localStorage.getItem('db_imported_v2')) {
+  localStorage.removeItem('mock_branches');
+  localStorage.removeItem('mock_products');
+  localStorage.removeItem('mock_staff');
+  localStorage.setItem('db_imported_v2', 'true');
+}
+
 if (!localStorage.getItem('mock_branches')) {
   localStorage.setItem('mock_branches', JSON.stringify([
     {
-      id: "branch-1",
+      id: "a25d3da6-d4ad-476c-b607-03103e5ebf92",
       name: "Yunusobod filiali",
       address: "Toshkent shahar, Yunusobod tumani"
     },
     {
-      id: "branch-2",
+      id: "a25d3da6-dcbb-404d-9a68-4558edaa69f6",
       name: "Chilonzor filiali",
       address: "Toshkent shahar, Chilonzor tumani"
     }
@@ -42,34 +49,54 @@ if (!localStorage.getItem('mock_branches')) {
 if (!localStorage.getItem('mock_products')) {
   localStorage.setItem('mock_products', JSON.stringify([
     {
-      id: "prod-1",
-      branch_id: "branch-1",
-      qr_code: "TEL-IP15P",
-      model_name: "iPhone 15 Pro",
-      specifications: { ram: "8GB", storage: "256GB", color: "Natural Titanium", size: "159.9x76.7x8.3 mm" },
+      id: "a25d3dac-3f0c-4e35-93fb-4d54777dcae8",
+      qr_code: "iph15pm-256-blue",
+      model_name: "iPhone 15 Pro Max",
+      specifications: { storage: "256GB", color: "Blue Titanium", ram: "8GB", size: "159.9x76.7x8.3 mm" },
       quantity: 15,
-      purchase_price: 950.00,
-      retail_price: 1199.00
+      purchase_price: 1100.00,
+      retail_price: 1350.00,
+      branch_id: "a25d3da6-d4ad-476c-b607-03103e5ebf92"
     },
     {
-      id: "prod-2",
-      branch_id: "branch-1",
-      qr_code: "TEL-S24U",
+      id: "a25d3dac-41db-4e63-87b1-f585d3c7ee80",
+      qr_code: "s24u-512-gray",
       model_name: "Samsung Galaxy S24 Ultra",
-      specifications: { ram: "12GB", storage: "512GB", color: "Titanium Gray", size: "162.3x79.0x8.6 mm" },
-      quantity: 8,
-      purchase_price: 990.00,
-      retail_price: 1299.00
+      specifications: { storage: "512GB", color: "Titanium Gray", ram: "12GB", size: "162.3x79.0x8.6 mm" },
+      quantity: 10,
+      purchase_price: 1050.00,
+      retail_price: 1290.00,
+      branch_id: "a25d3da6-d4ad-476c-b607-03103e5ebf92"
     },
     {
-      id: "prod-3",
-      branch_id: "branch-2",
-      qr_code: "TEL-N13P",
-      model_name: "Redmi Note 13 Pro+",
-      specifications: { ram: "12GB", storage: "512GB", color: "Midnight Black", size: "161.4x74.2x8.9 mm" },
-      quantity: 25,
-      purchase_price: 320.00,
-      retail_price: 449.00
+      id: "a25d3dac-44bf-438b-bd2a-75f53cd11d77",
+      qr_code: "x14u-512-blk",
+      model_name: "Xiaomi 14 Ultra",
+      specifications: { storage: "512GB", color: "Black", ram: "16GB", size: "161.4x75.3x9.2 mm" },
+      quantity: 5,
+      purchase_price: 850.00,
+      retail_price: 1050.00,
+      branch_id: "a25d3da6-dcbb-404d-9a68-4558edaa69f6"
+    },
+    {
+      id: "a25f9e1c-3677-4898-960d-cd72946ea4ac",
+      qr_code: "TEST-1785315582",
+      model_name: "iPhone 16 Pro Max",
+      specifications: { ram: "8GB", storage: "512GB", color: "Titan Desert", size: "6.9" },
+      quantity: 8,
+      purchase_price: 1100.00,
+      retail_price: 1400.00,
+      branch_id: "a25d3da6-d4ad-476c-b607-03103e5ebf92"
+    },
+    {
+      id: "a25f9e3c-d40c-47bb-8216-7e0a1cd2d7bc",
+      qr_code: "TEST-1785315603",
+      model_name: "iPhone 16 Pro Max",
+      specifications: { ram: "8GB", storage: "512GB", color: "Titan Desert", size: "6.9" },
+      quantity: 8,
+      purchase_price: 1100.00,
+      retail_price: 1400.00,
+      branch_id: "a25d3da6-d4ad-476c-b607-03103e5ebf92"
     }
   ]));
 }
@@ -77,28 +104,49 @@ if (!localStorage.getItem('mock_products')) {
 if (!localStorage.getItem('mock_staff')) {
   localStorage.setItem('mock_staff', JSON.stringify([
     {
-      id: "staff-1",
-      branch_id: "branch-1",
+      id: "a25d3da8-77e1-4f5b-921e-1edb42fbd969",
+      branch_id: "a25d3da6-d4ad-476c-b607-03103e5ebf92",
       name: "Yunusobod Kassiri",
       email: "cashier@gmail.com",
+      role: "cashier",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
     },
     {
-      id: "staff-2",
-      branch_id: "branch-1",
+      id: "a25d3da9-8709-41d6-9eac-431221a1d7de",
+      branch_id: "a25d3da6-dcbb-404d-9a68-4558edaa69f6",
+      name: "Chilonzor Kassiri",
+      email: "cashier2@gmail.com",
+      role: "cashier",
+      wage_structure: 15.00,
+      operational_hours: ["Dush-Jum: 08:00 - 20:00"]
+    },
+    {
+      id: "a25d3daa-9b7d-4c25-a6a2-84f574e999f7",
+      branch_id: "a25d3da6-d4ad-476c-b607-03103e5ebf92",
       name: "Diyorbek Kassir",
       email: "diyorbek@gmail.com",
+      role: "cashier",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
     },
     {
-      id: "staff-3",
-      branch_id: "branch-2",
+      id: "a25d3dab-abe8-4c92-a762-ffb262a301e6",
+      branch_id: "a25d3da6-dcbb-404d-9a68-4558edaa69f6",
       name: "Sardor Kassir",
       email: "sardor@gmail.com",
+      role: "cashier",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
+    },
+    {
+      id: "a25d3dac-3ad5-4da1-8fef-ecb3a60a3cb7",
+      branch_id: null,
+      name: "Qurilma Skanerlovchi",
+      email: "scanner@gmail.com",
+      role: "scanner",
+      wage_structure: 0.00,
+      operational_hours: ["Har kuni 24/7"]
     }
   ]));
 }
@@ -178,6 +226,14 @@ if (!localStorage.getItem('mock_partner_orders')) {
  * Standard HTTP Request handler to Laravel Backend with Offline Demo Mock Fallback
  */
 export async function request(endpoint, method = 'GET', body = null) {
+  const isWebView = window.location.protocol === 'file:';
+  const serverIp = localStorage.getItem('telebar_server_ip') || '';
+  
+  // If running inside WebView without an explicit server IP, route immediately to local Mock database
+  if (isWebView && !serverIp) {
+    return handleMockRouting(endpoint, method, body);
+  }
+
   const headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
