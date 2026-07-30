@@ -1,6 +1,8 @@
 import { io } from 'socket.io-client';
 
-const SERVER_IP = localStorage.getItem('telebar_server_ip') || 'localhost';
+const isWebView = window.location.protocol === 'file:';
+const defaultIp = isWebView ? '10.0.2.2' : 'localhost';
+const SERVER_IP = localStorage.getItem('telebar_server_ip') || defaultIp;
 const API_BASE_URL = `http://${SERVER_IP}:8000/api`;
 const SOCKET_BASE_URL = `http://${SERVER_IP}:3000`;
 
@@ -226,14 +228,6 @@ if (!localStorage.getItem('mock_partner_orders')) {
  * Standard HTTP Request handler to Laravel Backend with Offline Demo Mock Fallback
  */
 export async function request(endpoint, method = 'GET', body = null) {
-  const isWebView = window.location.protocol === 'file:';
-  const serverIp = localStorage.getItem('telebar_server_ip') || '';
-  
-  // If running inside WebView without an explicit server IP, route immediately to local Mock database
-  if (isWebView && !serverIp) {
-    return handleMockRouting(endpoint, method, body);
-  }
-
   const headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
