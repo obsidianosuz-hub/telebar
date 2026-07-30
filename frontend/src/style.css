@@ -323,6 +323,7 @@ select.neo-input option {
   z-index: 100;
   box-shadow: var(--glass-shadow);
   flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-top {
@@ -1164,5 +1165,71 @@ body.preset-minimalist .neo-table td {
   
   .stats-grid .glass-card:last-child {
     grid-column: span 1 !important;
+  }
+}
+
+/* ==========================================
+   SIDEBAR COLLAPSED / TOGGLED STATES
+   ========================================== */
+
+/* 1. Desktop Collapse (Width > 768px) */
+@media (min-width: 769px) {
+  #main-shell.sidebar-collapsed .app-sidebar {
+    width: 76px !important;
+    padding: 32px 10px !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .brand-logo {
+    display: none !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .sidebar-top div {
+    justify-content: center !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar #btn-toggle-sidebar {
+    transform: rotate(180deg);
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar #debug-banner,
+  #main-shell.sidebar-collapsed .app-sidebar .user-status-badge,
+  #main-shell.sidebar-collapsed .app-sidebar .sidebar-bottom {
+    display: none !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .nav-link span {
+    display: none !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .nav-link i {
+    margin-right: 0 !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .nav-link {
+    justify-content: center !important;
+    padding: 12px !important;
+  }
+}
+
+/* 2. Mobile Collapse (Width <= 768px) */
+@media (max-width: 768px) {
+  #main-shell.sidebar-collapsed .app-sidebar .app-nav {
+    display: none !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .sidebar-bottom {
+    display: none !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar .user-status-badge {
+    display: none !important;
+  }
+
+  #main-shell.sidebar-collapsed .app-sidebar #btn-toggle-sidebar i {
+    transform: rotate(-90deg) !important; /* Arrow points down when collapsed on mobile */
+  }
+
+  #main-shell:not(.sidebar-collapsed) .app-sidebar #btn-toggle-sidebar i {
+    transform: rotate(90deg) !important; /* Arrow points up when expanded on mobile */
   }
 }

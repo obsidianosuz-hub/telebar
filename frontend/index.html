@@ -85,7 +85,12 @@
     <div id="main-shell" style="display: none; flex-direction: row; min-height: 100vh;">
       <aside class="app-sidebar">
         <div class="sidebar-top">
-          <div class="brand-logo" id="logo-branding-text" data-i18n="brand">telebar</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div class="brand-logo" id="logo-branding-text" data-i18n="brand" style="margin: 0;">telebar</div>
+            <button id="btn-toggle-sidebar" class="neo-input" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); border-radius: 8px; cursor: pointer; color: var(--accent); transition: all 0.2s;" title="Bo'limlarni yashirish/ko'rsatish">
+              <i class="fas fa-chevron-left" id="sidebar-toggle-icon"></i>
+            </button>
+          </div>
           
           <!-- Live Session Debugger -->
           <div id="debug-banner" style="font-size: 10px; color: var(--accent); background: rgba(0, 242, 254, 0.08); padding: 8px; border-radius: 8px; font-family: monospace; border: 1px solid rgba(0, 242, 254, 0.15);">
@@ -102,14 +107,14 @@
         </div>
 
         <nav class="app-nav">
-          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" data-i18n="nav_dashboard" style="display: none;" draggable="true">Boshqaruv Paneli</a>
-          <a class="nav-link" data-view="pos" id="nav-pos-tab" data-i18n="nav_pos" draggable="true">Sotuv (POS)</a>
-          <a class="nav-link" data-view="warehouse" id="nav-wh" data-i18n="nav_warehouse" draggable="true">Omborxona</a>
-          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" data-i18n="nav_staff" style="display: none;" draggable="true">Xodimlar</a>
-          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" data-i18n="nav_branches" style="display: none;" draggable="true">Ob'yektlar</a>
-          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 6px;"></i>Click Integratsiya</a>
-          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 6px;"></i>Oxirgi Amallar</a>
-          <a class="nav-link admin-only" data-view="settings" id="nav-set" data-i18n="nav_settings" style="display: none;" draggable="true">Sozlamalar</a>
+          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" data-i18n="nav_dashboard" style="display: none;" draggable="true"><i class="fas fa-chart-line" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Boshqaruv Paneli</span></a>
+          <a class="nav-link" data-view="pos" id="nav-pos-tab" data-i18n="nav_pos" draggable="true"><i class="fas fa-cash-register" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Sotuv (POS)</span></a>
+          <a class="nav-link" data-view="warehouse" id="nav-wh" data-i18n="nav_warehouse" draggable="true"><i class="fas fa-boxes" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Omborxona</span></a>
+          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" data-i18n="nav_staff" style="display: none;" draggable="true"><i class="fas fa-users" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Xodimlar</span></a>
+          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" data-i18n="nav_branches" style="display: none;" draggable="true"><i class="fas fa-store" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Ob'yektlar</span></a>
+          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Click Integratsiya</span></a>
+          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Oxirgi Amallar</span></a>
+          <a class="nav-link admin-only" data-view="settings" id="nav-set" data-i18n="nav_settings" style="display: none;" draggable="true"><i class="fas fa-cogs" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Sozlamalar</span></a>
         </nav>
 
         <div class="sidebar-bottom">
