@@ -1,7 +1,8 @@
 import { io } from 'socket.io-client';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-const SOCKET_BASE_URL = 'http://localhost:3000';
+const SERVER_IP = localStorage.getItem('telebar_server_ip') || 'localhost';
+const API_BASE_URL = `http://${SERVER_IP}:8000/api`;
+const SOCKET_BASE_URL = `http://${SERVER_IP}:3000`;
 
 let token = localStorage.getItem('telebar_token') || null;
 let socket = null;

@@ -20,6 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
   checkExistingSession();
   setupEventListeners();
   setupSidebarDragAndDrop();
+
+  // Server IP Settings Toggle & Save
+  const toggleBtn = document.getElementById('toggle-server-settings');
+  const panel = document.getElementById('server-settings-panel');
+  const ipInput = document.getElementById('server-ip-input');
+  const saveBtn = document.getElementById('save-server-ip-btn');
+  
+  if (toggleBtn && panel && ipInput && saveBtn) {
+    ipInput.value = localStorage.getItem('telebar_server_ip') || '';
+    
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    saveBtn.addEventListener('click', () => {
+      const ip = ipInput.value.trim();
+      if (ip) {
+        localStorage.setItem('telebar_server_ip', ip);
+        showToast("Server IP manzili saqlandi! Ilovani qayta yuklang.", 'success');
+      } else {
+        localStorage.removeItem('telebar_server_ip');
+        showToast("Server manzili standart (localhost) holatga qaytarildi!", 'success');
+      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    });
+  }
 });
 
 function showToast(message, type = 'success') {

@@ -42,8 +42,8 @@ fun MainScreen(
           }
         }
         
-        // 10.0.2.2 targets host computer localhost inside Android Emulator
-        loadUrl("http://10.0.2.2:5174/")
+        // Load the fully packaged local HTML5 frontend assets
+        loadUrl("file:///android_asset/dist/index.html")
       }
     }
   )
