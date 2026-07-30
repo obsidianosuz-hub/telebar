@@ -49,8 +49,14 @@ class ScanRequestController extends Controller
             'description' => "Yangi shtrix-kod skanerlandi: {$scanRequest->qr_code} (Omborga kiritish arizasi)",
         ]);
 
-        // Broadcast to websocket if needed
-        // (Optional node.js event dispatch could be added here)
+        // Broadcast to websocket
+        $this->notifyScanEvent('scan:created', [
+            'id' => $scanRequest->id,
+            'qr_code' => $scanRequest->qr_code,
+            'branch_id' => $scanRequest->branch_id,
+            'status' => $scanRequest->status,
+            'created_at' => $scanRequest->created_at->toISOString()
+        ]);
 
         return response()->json([
             'message' => 'Skanerlash arizasi omborga yuborildi',
@@ -87,6 +93,15 @@ class ScanRequestController extends Controller
             'description' => "Skanerlash arizasi ko'rib chiqildi: {$scanRequest->qr_code} (" . ($scanRequest->status === 'approved' ? 'Tasdiqlandi' : 'Rad etildi') . ")",
         ]);
 
+        // Broadcast to websocket
+        if ($scanRequest->status === 'approved') {
+            $this->notifyScanEvent('scan:approved', [
+                'id' => $scanRequest->id,
+                'qr_code' => $scanRequest->qr_code,
+                'status' => $scanRequest->status
+            ]);
+        }
+
         return response()->json([
             'message' => 'Ariza holati yangilandi',
             'scan_request' => $scanRequest
@@ -103,10 +118,43 @@ class ScanRequestController extends Controller
             return response()->json(['message' => 'Ariza topilmadi'], 404);
         }
 
+        $qr_code = $scanRequest->qr_code;
         $scanRequest->delete();
+
+        // Broadcast to websocket to clear the request
+        $this->notifyScanEvent('scan:approved', [
+            'id' => $id,
+            'qr_code' => $qr_code,
+            'status' => 'cleared'
+        ]);
 
         return response()->json([
             'message' => 'Skanerlash arizasi o\'chirildi'
         ], 200);
+    }
+
+    /**
+     * Send WebSocket webhook to Node.js when scan events occur.
+     */
+    protected function notifyScanEvent($event, $data)
+    {
+        $url = env('REALTIME_SERVER_URL', 'http://localhost:3000') . '/api/telemetry';
+        
+        try {
+            $ch = curl_init($url);
+            $payload = json_encode([
+                'event' => $event,
+                'data' => $data
+            ]);
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            curl_exec($ch);
+            curl_close($ch);
+        } catch (\Exception $e) {
+            // Ignore offline Socket.io server
+        }
     }
 }

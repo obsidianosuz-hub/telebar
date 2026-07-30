@@ -359,7 +359,8 @@ async function loginSuccess(user) {
 function handleTelemetryEvent(event, data) {
   console.log(`[Ecosystem Socket Dispatch] -> ${event}`, data);
   
-  const currentView = document.querySelector('.nav-link.active').getAttribute('data-view');
+  const activeLink = document.querySelector('.nav-link.active');
+  const currentView = activeLink ? activeLink.getAttribute('data-view') : '';
 
   if (event === 'shift:started') {
     showToast(`${data.user_name} navbatchilikni boshladi.`, 'success');
@@ -383,6 +384,20 @@ function handleTelemetryEvent(event, data) {
     if (currentView === 'pos') refreshPOSProducts();
     if (currentView === 'warehouse') loadWarehouseProducts();
     if (currentView === 'dashboard') loadDashboardData();
+  }
+  
+  else if (event === 'scan:created') {
+    showToast(`Yangi mobil skanerlash arizasi kelib tushdi!`, 'success');
+    if (currentView === 'warehouse') loadScanRequests();
+  }
+  
+  else if (event === 'scan:approved') {
+    showToast(`Skanerlash arizasi tasdiqlandi va omborga qo'shildi.`, 'success');
+    if (currentView === 'warehouse') {
+      loadScanRequests();
+      loadWarehouseProducts();
+    }
+    if (currentView === 'pos') refreshPOSProducts();
   }
   
   else if (event === 'settings:changed') {
