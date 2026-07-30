@@ -81,4 +81,7 @@ dependencies {
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+  
+  // WebKit for local assets server loading
+  implementation("androidx.webkit:webkit:1.11.0")
 }
