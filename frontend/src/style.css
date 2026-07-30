@@ -1012,3 +1012,157 @@ body.preset-minimalist .neo-table td {
   border: 1px dashed var(--accent) !important;
   background: rgba(0, 242, 254, 0.05) !important;
 }
+
+/* ==========================================
+   MOBILE & TABLET RESPONSIVENESS OVERRIDES
+   ========================================== */
+
+@media (max-width: 992px) {
+  /* POS layout columns */
+  .pos-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Main Shell Layout Stack */
+  #main-shell {
+    flex-direction: column !important;
+  }
+
+  .app-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    padding: 16px !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* User Info card layout on mobile */
+  .sidebar-top {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .user-status-badge {
+    margin-top: 0 !important;
+  }
+
+  #debug-banner {
+    display: none !important; /* Hide debugger on mobile screens */
+  }
+
+  /* Navigation stack horizontally with wrapping */
+  .app-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    margin-top: 16px !important;
+    width: 100% !important;
+  }
+
+  .nav-link {
+    flex: 1 1 calc(50% - 6px) !important; /* Two links per row on mobile */
+    min-width: 120px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border-left: none !important;
+    border-bottom: 2px solid transparent !important;
+  }
+
+  .nav-link.active {
+    border-left: none !important;
+    border-bottom: 2px solid var(--accent) !important;
+  }
+
+  /* Hide large information block on sidebar bottom */
+  .sidebar-bottom {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    margin-top: 16px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-top: 16px !important;
+  }
+
+  .sidebar-bottom .btn-secondary {
+    width: 100% !important;
+  }
+
+  /* Main content padding adjustments */
+  .app-content {
+    padding: 16px !important;
+  }
+
+  /* Dashboard top metrics cards layout */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important; /* 2 columns on mobile instead of 1 stack */
+    gap: 12px !important;
+  }
+
+  .stats-grid .glass-card:last-child {
+    grid-column: span 2 !important; /* Last card spans full width */
+  }
+
+  /* Inline styled rows stack vertically */
+  div[style*="display: flex; gap: 20px;"],
+  div[style*="display: flex; gap: 20px"],
+  div[style*="display: flex; gap: 16px;"],
+  div[style*="display: flex; gap: 16px"] {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  div[style*="flex: 1;"] {
+    width: 100% !important;
+  }
+
+  /* Table styling responsiveness */
+  .table-responsive {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .neo-table th, .neo-table td {
+    padding: 10px 12px !important;
+    font-size: 11px !important;
+  }
+
+  /* Checkout Cart sizing */
+  .glass-card[style*="width: 400px"] {
+    width: 100% !important;
+  }
+
+  /* Auth Card adjustments */
+  .auth-card {
+    width: 95% !important;
+    max-width: 400px !important;
+    margin: 12px !important;
+    padding: 24px !important;
+  }
+
+  /* Modals */
+  .modal-content {
+    width: 95% !important;
+    margin: 10px !important;
+    padding: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* On extremely narrow screens, metrics stack completely */
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  
+  .stats-grid .glass-card:last-child {
+    grid-column: span 1 !important;
+  }
+}
