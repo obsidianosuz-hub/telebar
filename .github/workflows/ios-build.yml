@@ -35,7 +35,10 @@ jobs:
       - name: Build iOS Application
         run: |
           cd flutter_mobile
-          flutter build ios --no-codesign --release
+          flutter build ios --config-only
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE_SPECIFIER=""
+          cd ..
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r telebar.ipa Payload
