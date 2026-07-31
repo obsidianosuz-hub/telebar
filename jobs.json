@@ -1,0 +1,137 @@
+{
+  "total_count": 1,
+  "jobs": [
+    {
+      "id": 91123963819,
+      "run_id": 30620592277,
+      "workflow_name": "Build Mobile Applications (Android & iOS)",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/obsidianosuz-hub/telebar/actions/runs/30620592277",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTl7m9c8AAAAVN2lXqw",
+      "head_sha": "5d7b93f1544478be11f16a4ff3095d91b693bbe1",
+      "url": "https://api.github.com/repos/obsidianosuz-hub/telebar/actions/jobs/91123963819",
+      "html_url": "https://github.com/obsidianosuz-hub/telebar/actions/runs/30620592277/job/91123963819",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-07-31T09:37:07Z",
+      "started_at": "2026-07-31T09:37:17Z",
+      "completed_at": "2026-07-31T09:43:22Z",
+      "name": "Build Multi-Platform Apps",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-31T09:37:18Z",
+          "completed_at": "2026-07-31T09:37:21Z"
+        },
+        {
+          "name": "Checkout Code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-31T09:37:21Z",
+          "completed_at": "2026-07-31T09:37:24Z"
+        },
+        {
+          "name": "Setup Java JDK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-31T09:37:24Z",
+          "completed_at": "2026-07-31T09:37:29Z"
+        },
+        {
+          "name": "Setup Flutter SDK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-31T09:37:29Z",
+          "completed_at": "2026-07-31T09:38:52Z"
+        },
+        {
+          "name": "Install Dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-31T09:38:52Z",
+          "completed_at": "2026-07-31T09:39:04Z"
+        },
+        {
+          "name": "Build Android APK",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 6,
+          "started_at": "2026-07-31T09:39:04Z",
+          "completed_at": "2026-07-31T09:43:15Z"
+        },
+        {
+          "name": "Build iOS Application",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-07-31T09:43:15Z",
+          "completed_at": "2026-07-31T09:43:15Z"
+        },
+        {
+          "name": "Upload Android Build Artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-07-31T09:43:15Z",
+          "completed_at": "2026-07-31T09:43:15Z"
+        },
+        {
+          "name": "Upload iOS Build Artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-07-31T09:43:15Z",
+          "completed_at": "2026-07-31T09:43:15Z"
+        },
+        {
+          "name": "Post Setup Flutter SDK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-07-31T09:43:15Z",
+          "completed_at": "2026-07-31T09:43:15Z"
+        },
+        {
+          "name": "Post Setup Java JDK",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-07-31T09:43:15Z",
+          "completed_at": "2026-07-31T09:43:16Z"
+        },
+        {
+          "name": "Post Checkout Code",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-07-31T09:43:16Z",
+          "completed_at": "2026-07-31T09:43:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-07-31T09:43:17Z",
+          "completed_at": "2026-07-31T09:43:20Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/obsidianosuz-hub/telebar/check-runs/91123963819",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000000003,
+      "runner_name": "GitHub Actions 1000000003",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

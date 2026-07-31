@@ -32,11 +32,6 @@ jobs:
           cd flutter_mobile
           flutter pub get
 
-      - name: Build Android APK
-        run: |
-          cd flutter_mobile
-          flutter build apk --debug --android-skip-build-dependency-validation
-
       - name: Build iOS Application
         run: |
           cd flutter_mobile
@@ -47,12 +42,6 @@ jobs:
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r telebar.ipa Payload
-
-      - name: Upload Android Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: telebar-android-universal
-          path: flutter_mobile/build/app/outputs/flutter-apk/app-debug.apk
 
       - name: Upload iOS Build Artifacts
         uses: actions/upload-artifact@v4
