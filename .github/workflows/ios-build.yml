@@ -42,7 +42,7 @@ jobs:
           cd flutter_mobile
           flutter build ios --config-only
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE_SPECIFIER=""
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE_SPECIFIER="" CONFIGURATION_BUILD_DIR=../build/ios/iphoneos
           cd ..
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
