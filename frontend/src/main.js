@@ -2,6 +2,15 @@ import './style.css';
 import { getLanguage, setLanguage, applyTranslations, dictionaries } from './i18n.js';
 import { getToken, setToken, request, initSocket } from './api.js';
 
+// Service Worker Registration for PWA Support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker registered successfully!', reg.scope))
+      .catch(err => console.error('Service Worker registration failed:', err));
+  });
+}
+
 // Application State
 let currentUser = null;
 let currentCart = [];
