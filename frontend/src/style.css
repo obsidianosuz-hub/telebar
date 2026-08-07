@@ -1233,3 +1233,14 @@ body.preset-minimalist .neo-table td {
     transform: rotate(90deg) !important; /* Arrow points up when expanded on mobile */
   }
 }
+
+/* APK Download Button Hover Effect */
+.apk-download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(164, 198, 57, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+  filter: brightness(1.05);
+}
+.apk-download-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(164, 198, 57, 0.2);
+}
