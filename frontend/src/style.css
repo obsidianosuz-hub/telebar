@@ -1234,13 +1234,20 @@ body.preset-minimalist .neo-table td {
   }
 }
 
-/* APK Download Button Hover Effect */
-.apk-download-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(164, 198, 57, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
-  filter: brightness(1.05);
+/* App Icon Buttons */
+.app-icon-btn {
+  transition: all 0.2s ease !important;
 }
-.apk-download-btn:active {
+.app-icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+.app-icon-btn.android-btn:hover {
+  background: rgba(164, 198, 57, 0.2) !important;
+  border-color: rgba(164, 198, 57, 0.4) !important;
+  color: #b8db45 !important;
+  box-shadow: 0 0 15px rgba(164, 198, 57, 0.25) !important;
+}
+.app-icon-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(164, 198, 57, 0.2);
 }
