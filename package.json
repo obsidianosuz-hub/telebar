@@ -1,0 +1,15 @@
+{
+  "name": "telebar-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo root to run Telebar Laravel backend, Realtime server, and Vue frontend concurrently",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix realtime",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:realtime": "node realtime/server.js",
+    "dev:backend": "php backend/artisan serve --host 0.0.0.0 --port 8000",
+    "dev": "concurrently --kill-others \"npm run dev:frontend\" \"npm run dev:realtime\" \"npm run dev:backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

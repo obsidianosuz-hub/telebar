@@ -74,7 +74,7 @@ class _MainWebViewPageState extends State<MainWebViewPage> {
     final platform = _controller.platform;
     if (platform is AndroidWebViewController) {
       AndroidWebViewController.enableDebugging(true);
-      platform.setPermissionRequestCallback((request) async {
+      platform.setOnPlatformPermissionRequest((request) async {
         // Automatically grant camera permissions requested by the web app
         await request.grant();
       });
