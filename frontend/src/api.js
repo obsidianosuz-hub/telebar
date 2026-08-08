@@ -4,7 +4,7 @@ const isWebView = window.location.protocol === 'file:';
 const defaultMode = 'online';
 const SYSTEM_MODE = localStorage.getItem('telebar_system_mode') || defaultMode;
 
-const defaultIp = '10.51.65.97';
+const defaultIp = '10.161.248.97';
 const SERVER_IP = localStorage.getItem('telebar_server_ip') || defaultIp;
 const API_BASE_URL = `http://${SERVER_IP}:8000/api`;
 const SOCKET_BASE_URL = `http://${SERVER_IP}:3000`;
