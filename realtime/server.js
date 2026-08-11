@@ -63,7 +63,7 @@ io.on('connection', (socket) => {
 });
 
 // Port configuration
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`==================================================`);
   console.log(`  Telebar Real-Time Telemetry running on port ${PORT}`);
