@@ -151,7 +151,7 @@ class SaleController extends Controller
      */
     public function history()
     {
-        $sales = Sale::with(['product', 'shift.user'])
+        $sales = Sale::with(['product.branch', 'shift.user.branch'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($s) {
@@ -164,6 +164,8 @@ class SaleController extends Controller
                     'retail_price' => $s->product->retail_price ?? 0.00,
                     'total_price' => $s->total_price,
                     'cashier' => $s->shift->user->name ?? 'Kassir',
+                    'cashier_role' => $s->shift->user->role ?? 'cashier',
+                    'branch_name' => $s->product->branch->name ?? ($s->shift->user->branch->name ?? 'Asosiy Ofis'),
                     'time' => $s->timestamp ? $s->timestamp->toIso8601String() : $s->created_at->toIso8601String()
                 ];
             });

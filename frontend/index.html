@@ -67,7 +67,7 @@
         <!-- Server & Offline Mode Settings -->
         <div style="margin-top: 20px; text-align: center;">
           <!-- App Download Buttons (Android & iOS) -->
-          <div style="display: flex; justify-content: center; align-items: center; gap: 24px; width: 100%; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 18px; margin-bottom: 5px;">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 24px; width: 100%; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 18px; margin-bottom: 10px;">
             <!-- Android Button (Left) -->
             <a href="./telebar-full.apk" download="telebar-full.apk" class="app-icon-btn android-btn" title="Android ilovasini yuklash" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, rgba(164, 198, 57, 0.12), rgba(164, 198, 57, 0.04)); border: 1px solid rgba(164, 198, 57, 0.3); color: #a4c639; font-size: 21px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 12px rgba(164, 198, 57, 0.15), inset 0 1px 0 rgba(255,255,255,0.1);">
               <i class="fab fa-android"></i>
@@ -78,8 +78,22 @@
               <i class="fab fa-apple"></i>
             </a>
           </div>
-          
-          <a href="#" id="toggle-server-settings" style="font-size: 11px; color: rgba(255,255,255,0.2); text-decoration: none; margin-top: 10px; display: inline-block; transition: all 0.2s;">Tizim sozlamalari</a>
+
+          <!-- PWA Install Button (Dynamic detection) -->
+          <div id="pwa-install-container" style="display: none; justify-content: center; width: 100%; margin-bottom: 8px;">
+            <button id="btn-install-pwa" class="app-icon-btn" title="Telebar ilovasini ekranga o'rnatish" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 180px; padding: 8px 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(0, 242, 254, 0.12), rgba(0, 242, 254, 0.04)); border: 1px solid rgba(0, 242, 254, 0.3); color: var(--accent); font-size: 11px; font-weight: 600; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 12px rgba(0, 242, 254, 0.15), inset 0 1px 0 rgba(255,255,255,0.1);">
+              <i class="fas fa-laptop" style="font-size: 12px; color: var(--accent);"></i>
+              <span>Dasturni o'rnatish (PWA)</span>
+            </button>
+          </div>
+
+          <!-- Windows Button (Below them) -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; margin-bottom: 8px;">
+            <a href="./telebar.exe" download="telebar.exe" class="app-icon-btn windows-btn" title="Windows ilovasini (.EXE) yuklash" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 180px; padding: 8px 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(0, 120, 212, 0.12), rgba(0, 120, 212, 0.04)); border: 1px solid rgba(0, 120, 212, 0.3); color: #0078d4; font-size: 11px; font-weight: 600; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 12px rgba(0, 120, 212, 0.15), inset 0 1px 0 rgba(255,255,255,0.1);">
+              <i class="fab fa-windows" style="font-size: 13px;"></i>
+              <span>Windows (.EXE) yuklash</span>
+            </a>
+          </div>
 
           <div id="server-settings-panel" style="display: none; margin-top: 12px; text-align: left;">
             <div class="form-group" style="margin-bottom: 10px;">
@@ -125,14 +139,14 @@
         </div>
 
         <nav class="app-nav">
-          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" data-i18n="nav_dashboard" style="display: none;" draggable="true"><i class="fas fa-chart-line" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Boshqaruv Paneli</span></a>
-          <a class="nav-link" data-view="pos" id="nav-pos-tab" data-i18n="nav_pos" draggable="true"><i class="fas fa-cash-register" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Sotuv (POS)</span></a>
-          <a class="nav-link" data-view="warehouse" id="nav-wh" data-i18n="nav_warehouse" draggable="true"><i class="fas fa-boxes" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Omborxona</span></a>
-          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" data-i18n="nav_staff" style="display: none;" draggable="true"><i class="fas fa-users" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Xodimlar</span></a>
-          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" data-i18n="nav_branches" style="display: none;" draggable="true"><i class="fas fa-store" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Ob'yektlar</span></a>
-          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Click Integratsiya</span></a>
-          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Oxirgi Amallar</span></a>
-          <a class="nav-link admin-only" data-view="settings" id="nav-set" data-i18n="nav_settings" style="display: none;" draggable="true"><i class="fas fa-cogs" style="margin-right: 8px; width: 16px; text-align: center;"></i><span>Sozlamalar</span></a>
+          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" style="display: none;" draggable="true"><i class="fas fa-chart-line" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_dashboard">Boshqaruv Paneli</span></a>
+          <a class="nav-link" data-view="pos" id="nav-pos-tab" draggable="true"><i class="fas fa-cash-register" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_pos">Sotuv (POS)</span></a>
+          <a class="nav-link" data-view="warehouse" id="nav-wh" draggable="true"><i class="fas fa-boxes" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_warehouse">Omborxona</span></a>
+          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" style="display: none;" draggable="true"><i class="fas fa-users" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_staff">Xodimlar</span></a>
+          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" style="display: none;" draggable="true"><i class="fas fa-store" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_branches">Ob'yektlar</span></a>
+          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_click">Click Integratsiya</span></a>
+          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_activities">Oxirgi Amallar</span></a>
+          <a class="nav-link admin-only" data-view="settings" id="nav-set" style="display: none;" draggable="true"><i class="fas fa-cogs" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_settings">Sozlamalar</span></a>
         </nav>
 
         <div class="sidebar-bottom">
@@ -261,6 +275,42 @@
             </div>
           </div>
 
+          <!-- Cashier Sales Details Card -->
+          <div class="glass-card" style="margin-top: 24px;">
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;">
+              <i class="fas fa-receipt" style="margin-right: 8px;"></i>Kassirlar Kesimida Mahsulotlar Sotuv Tarixi
+            </h3>
+            <div style="display: grid; grid-template-columns: 280px 1fr; gap: 24px;">
+              <!-- Left Column: Cashier selector buttons -->
+              <div style="display: flex; flex-direction: column; gap: 10px; border-right: 1px solid rgba(255,255,255,0.06); padding-right: 16px; max-height: 350px; overflow-y: auto;" id="cashier-details-selectors">
+                <div style="color: var(--color-text-secondary); text-align: center; padding-top: 20px;">Yuklanmoqda...</div>
+              </div>
+              
+              <!-- Right Column: Table of sales for the selected cashier -->
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <h4 id="selected-cashier-sales-title" style="margin: 0; font-size: 14px; color: #ffffff;">Kassirni tanlang</h4>
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                  <table class="neo-table">
+                    <thead>
+                      <tr>
+                        <th>Mahsulot</th>
+                        <th>Model</th>
+                        <th>Soni</th>
+                        <th>Jami summa</th>
+                        <th>Sotilgan vaqti</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cashier-details-sales-tbody">
+                      <tr>
+                        <td colspan="5" style="text-align: center; color: var(--color-text-secondary);">Chap tomondan kassirni tanlang</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Sales History Card -->
           <div class="glass-card" style="margin-top: 24px;">
             <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="dash_sales_history">Sotuvlar Tarixi</h3>
@@ -270,15 +320,16 @@
                   <tr>
                     <th data-i18n="wh_col_model">Smartfon</th>
                     <th data-i18n="wh_col_qr">Shtrix/QR</th>
+                    <th>Filial (Obyekt)</th>
                     <th data-i18n="wh_col_qty">Soni</th>
                     <th data-i18n="pos_total">Summa</th>
-                    <th data-i18n="staff_col_name">Sotuvchi</th>
+                    <th>Sotuvchi (Skaner)</th>
                     <th data-i18n="wh_col_actions">Vaqt</th>
                   </tr>
                 </thead>
                 <tbody id="sales-history-tbody">
                   <tr>
-                    <td colspan="6" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td>
+                    <td colspan="7" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td>
                   </tr>
                 </tbody>
               </table>
@@ -608,50 +659,50 @@
                 <input type="color" id="settings-accent-color" class="neo-input" style="height: 40px; padding: 2px; cursor: pointer;">
               </div>
               <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label">Dizayn Qolipi (UI Preset)</label>
+                <label class="form-label" data-i18n="set_preset">Dizayn Qolipi (UI Preset)</label>
                 <select id="settings-ui-preset" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="glassmorphism">Glassmorphism (Glassmorphic Glow)</option>
-                  <option value="neomorphism">Neomorphism (Neomorphic Matte)</option>
-                  <option value="cyberpunk">Cyberpunk (Cyberpunk Neon Glow)</option>
-                  <option value="minimalist">Minimalist (Minimalist Classic)</option>
+                  <option value="glassmorphism" data-i18n="opt_preset_glassmorphism">Glassmorphism (Glassmorphic Glow)</option>
+                  <option value="neomorphism" data-i18n="opt_preset_neomorphism">Neomorphism (Neomorphic Matte)</option>
+                  <option value="cyberpunk" data-i18n="opt_preset_cyberpunk">Cyberpunk (Cyberpunk Neon Glow)</option>
+                  <option value="minimalist" data-i18n="opt_preset_minimalist">Minimalist (Minimalist Classic)</option>
                 </select>
               </div>
               <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label">Muhit & Hissiyot Ranglari (Ambient Mood)</label>
+                <label class="form-label" data-i18n="set_mood_label">Muhit & Hissiyot Ranglari (Ambient Mood)</label>
                 <select id="settings-theme-mood" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="deep_space">Deep Space (Kosmik qora-ko'k)</option>
-                  <option value="emerald_forest">Emerald Forest (Zumrad yashil)</option>
-                  <option value="sunset_glow">Sunset Glow (Issiq quyosh botishi qizil)</option>
-                  <option value="midnight_indigo">Midnight Indigo (To'q binafsha-indigo)</option>
+                  <option value="deep_space" data-i18n="opt_mood_deep_space">Deep Space (Kosmik qora-ko'k)</option>
+                  <option value="emerald_forest" data-i18n="opt_mood_emerald_forest">Emerald Forest (Zumrad yashil)</option>
+                  <option value="sunset_glow" data-i18n="opt_mood_sunset_glow">Sunset Glow (Issiq quyosh botishi qizil)</option>
+                  <option value="midnight_indigo" data-i18n="opt_mood_midnight_indigo">Midnight Indigo (To'q binafsha-indigo)</option>
                 </select>
               </div>
               <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label">Orqa Fon Tasvirlari / Grid (Pattern)</label>
+                <label class="form-label" data-i18n="set_pattern_label">Orqa Fon Tasvirlari / Grid (Pattern)</label>
                 <select id="settings-theme-pattern" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="none">Oddiy (Solid Color)</option>
-                  <option value="geometric_grid">Geometrik Panjara (Tech Grid)</option>
-                  <option value="stars_space">Yulduzlar (Stardust Dots)</option>
-                  <option value="diagonal_cyber">Kiber Chiziqlar (Diagonal Tech Stripes)</option>
+                  <option value="none" data-i18n="opt_pattern_none">Oddiy (Solid Color)</option>
+                  <option value="geometric_grid" data-i18n="opt_pattern_grid">Geometrik Panjara (Tech Grid)</option>
+                  <option value="stars_space" data-i18n="opt_pattern_stars">Yulduzlar (Stardust Dots)</option>
+                  <option value="diagonal_cyber" data-i18n="opt_pattern_diagonal">Kiber Chiziqlar (Diagonal Tech Stripes)</option>
                 </select>
               </div>
               <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label">Orqa Fon Rasmi (Background Image)</label>
+                <label class="form-label" data-i18n="set_bg_image_label">Orqa Fon Rasmi (Background Image)</label>
                 <input type="hidden" id="settings-theme-bg-image">
                 <input type="file" id="settings-theme-bg-file" accept="image/*" style="display: none;">
                 <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
-                  <button type="button" class="btn-primary" id="upload-bg-btn" style="width: auto; padding: 10px 20px;"><i class="fas fa-upload" style="margin-right: 8px;"></i>Rasm yuklash</button>
-                  <button type="button" class="btn-secondary" id="clear-bg-btn" style="width: auto; padding: 10px 20px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);" title="Fon rasmini o'chirish"><i class="fas fa-trash-alt" style="margin-right: 8px;"></i>O'chirish</button>
+                  <button type="button" class="btn-primary" id="upload-bg-btn" style="width: auto; padding: 10px 20px;"><i class="fas fa-upload" style="margin-right: 8px;"></i><span data-i18n="btn_upload_bg">Rasm yuklash</span></button>
+                  <button type="button" class="btn-secondary" id="clear-bg-btn" style="width: auto; padding: 10px 20px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);" title="Fon rasmini o'chirish"><i class="fas fa-trash-alt" style="margin-right: 8px;"></i><span data-i18n="btn_clear_bg">O'chirish</span></button>
                 </div>
                 <div id="settings-theme-bg-preview-container" style="margin-top: 10px; display: none; align-items: center; gap: 10px;">
                   <img id="settings-theme-bg-preview" src="" style="width: 80px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
-                  <span style="font-size: 12px; color: var(--color-text-secondary);">Fon rasmi faol</span>
+                  <span style="font-size: 12px; color: var(--color-text-secondary);" data-i18n="set_bg_active">Fon rasmi faol</span>
                 </div>
               </div>
               <div class="form-group" style="margin-top: 10px;">
                 <label class="form-label" data-i18n="set_theme_mode">Tun-Kun rejimi (Theme Mode)</label>
                 <select id="settings-theme-mode" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="dark">Tun (Dark Mode)</option>
-                  <option value="light">Kun (Light Mode)</option>
+                  <option value="dark" data-i18n="opt_mode_dark">Tun (Dark Mode)</option>
+                  <option value="light" data-i18n="opt_mode_light">Kun (Light Mode)</option>
                 </select>
               </div>
             </div>
@@ -824,6 +875,20 @@
               <div class="form-group" style="flex: 1 1 100%;">
                 <label class="form-label" data-i18n="field_color">Color (Rangi)</label>
                 <input type="text" id="product-color" class="neo-input" placeholder="e.g. Deep Obsidian">
+              </div>
+            </div>
+            <div class="form-row" style="margin-top: 10px;">
+              <div class="form-group" style="flex: 1 1 100%;">
+                <label class="form-label" data-i18n="field_product_image">Smartfon Rasmi</label>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                  <button type="button" class="btn-primary" id="product-image-upload-btn" style="width: auto; padding: 10px 20px;"><i class="fas fa-image" style="margin-right: 8px;"></i><span data-i18n="btn_choose_image">Rasm tanlash</span></button>
+                  <input type="file" id="product-image-file" accept="image/*" style="display: none;">
+                  <input type="hidden" id="product-image-base64">
+                  <div id="product-image-preview-container" style="display: none; align-items: center; gap: 10px;">
+                    <img id="product-image-preview" src="" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
+                    <button type="button" class="btn-secondary" id="product-image-clear-btn" style="width: auto; padding: 8px 12px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);" title="Rasmni o'chirish"><i class="fas fa-trash-alt"></i></button>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="form-group" style="margin-top: 12px;">

@@ -170,10 +170,12 @@ class ShiftController extends Controller
             
             $totalSales = Sale::whereIn('shift_id', $shiftIds)->sum('total_price');
             $totalDevices = Sale::whereIn('shift_id', $shiftIds)->sum('quantity');
+            $totalExpenses = Shift::whereIn('user_id', $userIds)->where('status', 'completed')->sum('calculated_wage');
             
             return [
                 'branch_name' => $b->name,
                 'total_sales' => (float)$totalSales,
+                'total_expenses' => (float)$totalExpenses,
                 'total_devices' => (int)$totalDevices
             ];
         });
@@ -187,10 +189,14 @@ class ShiftController extends Controller
                   ->whereNotNull('users.branch_id');
         });
 
-        if ($nullBranchSales->count() > 0) {
+        $nullBranchUserIds = \App\Models\User::whereNull('branch_id')->pluck('id');
+        $nullBranchExpenses = Shift::whereIn('user_id', $nullBranchUserIds)->where('status', 'completed')->sum('calculated_wage');
+
+        if ($nullBranchSales->count() > 0 || $nullBranchExpenses > 0) {
             $branchBreakdown->push([
                 'branch_name' => 'Bosh qarorgoh / Ombor',
                 'total_sales' => (float)$nullBranchSales->sum('total_price'),
+                'total_expenses' => (float)$nullBranchExpenses,
                 'total_devices' => (int)$nullBranchSales->sum('quantity')
             ]);
         }
@@ -213,6 +219,24 @@ class ShiftController extends Controller
                 
                 $hasActiveShift = $userShifts->where('status', 'active')->first();
                 
+                // Get all sales for this user's shifts
+                $shiftIds = $userShifts->pluck('id');
+                $totalDevices = Sale::whereIn('shift_id', $shiftIds)->sum('quantity');
+                $recentSales = Sale::whereIn('shift_id', $shiftIds)
+                    ->with('product')
+                    ->orderBy('created_at', 'desc')
+                    ->take(10)
+                    ->get()
+                    ->map(function ($s) {
+                        return [
+                            'product_name' => $s->product->name ?? 'O\'chirilgan mahsulot',
+                            'model' => $s->product->model ?? '',
+                            'quantity' => (int)$s->quantity,
+                            'total_price' => (float)$s->total_price,
+                            'time' => $s->created_at->toIso8601String()
+                        ];
+                    });
+                
                 return [
                     'id' => $u->id,
                     'name' => $u->name,
@@ -221,7 +245,9 @@ class ShiftController extends Controller
                     'total_revenue' => (float)$totalRevenue,
                     'total_wage' => (float)$totalWage,
                     'total_hours' => round($totalMinutes / 60.0, 1),
+                    'total_devices' => (int)$totalDevices,
                     'status' => $hasActiveShift ? 'active' : 'inactive',
+                    'recent_sales' => $recentSales
                 ];
             });
 

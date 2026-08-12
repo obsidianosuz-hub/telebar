@@ -1199,6 +1199,11 @@ body.preset-minimalist .neo-table td {
 
   #main-shell.sidebar-collapsed .app-sidebar .nav-link span {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 
   #main-shell.sidebar-collapsed .app-sidebar .nav-link i {
@@ -1247,6 +1252,12 @@ body.preset-minimalist .neo-table td {
   border-color: rgba(164, 198, 57, 0.4) !important;
   color: #b8db45 !important;
   box-shadow: 0 0 15px rgba(164, 198, 57, 0.25) !important;
+}
+.app-icon-btn.windows-btn:hover {
+  background: rgba(0, 120, 212, 0.2) !important;
+  border-color: rgba(0, 120, 212, 0.4) !important;
+  color: #3ba1ff !important;
+  box-shadow: 0 0 15px rgba(0, 120, 212, 0.25) !important;
 }
 .app-icon-btn:active {
   transform: translateY(1px);

@@ -11,6 +11,58 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// PWA Install Event Handler
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const pwaContainer = document.getElementById('pwa-install-container');
+  if (pwaContainer) {
+    pwaContainer.style.display = 'flex';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('Telebar was installed successfully!');
+  const pwaContainer = document.getElementById('pwa-install-container');
+  if (pwaContainer) {
+    pwaContainer.style.display = 'none';
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnInstallPwa = document.getElementById('btn-install-pwa');
+  if (btnInstallPwa) {
+    btnInstallPwa.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to PWA install: ${outcome}`);
+      deferredPrompt = null;
+      const pwaContainer = document.getElementById('pwa-install-container');
+      if (pwaContainer) {
+        pwaContainer.style.display = 'none';
+      }
+    });
+  }
+
+  const btnCopyInstall = document.getElementById('btn-copy-install');
+  if (btnCopyInstall) {
+    btnCopyInstall.addEventListener('click', () => {
+      const command = `irm http://10.61.205.97:5174/install.ps1 | iex`;
+      navigator.clipboard.writeText(command)
+        .then(() => {
+          showToast('Nusxalandi! Windows PowerShell\'ga o\'ng tugma bilan joylab, Enter bosing.', 'success');
+        })
+        .catch(err => {
+          console.error('Nusxalashda xatolik:', err);
+          showToast('Nusxalab bo\'lmadi.', 'error');
+        });
+    });
+  }
+});
+
 // Application State
 let currentUser = null;
 let currentCart = [];
@@ -636,13 +688,87 @@ async function loadDashboardData() {
       }
     }
 
+    // Load Cashier Sales Details
+    const selectorsContainer = document.getElementById('cashier-details-selectors');
+    const salesTitle = document.getElementById('selected-cashier-sales-title');
+    const cashierSalesTbody = document.getElementById('cashier-details-sales-tbody');
+
+    if (selectorsContainer && cashierSalesTbody) {
+      if (!analytics.staff_stats || analytics.staff_stats.length === 0) {
+        selectorsContainer.innerHTML = `<div style="color:var(--color-text-secondary);text-align:center;padding:20px;">Kassirlar topilmadi</div>`;
+        cashierSalesTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--color-text-secondary);">Ma'lumot mavjud emas</td></tr>`;
+      } else {
+        const cashiers = analytics.staff_stats;
+
+        // Render selectors (left pane)
+        selectorsContainer.innerHTML = cashiers.map((c, index) => {
+          const isActive = c.status === 'active' ? '<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;margin-left:auto;"></span>' : '';
+          return `
+            <button class="cashier-selector-btn" style="width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; background:${index === 0 ? 'rgba(0, 242, 254, 0.08)' : 'rgba(255,255,255,0.02)'}; border:1px solid ${index === 0 ? 'rgba(0, 242, 254, 0.25)' : 'rgba(255,255,255,0.06)'}; border-radius:10px; color:#ffffff; font-size:13px; font-weight:600; text-align:left; cursor:pointer; transition:all 0.2s; border-style:solid;">
+              <div style="width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:var(--accent);">
+                <i class="fas fa-user-tie"></i>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</span>
+                <span style="font-size:10px; color:var(--color-text-secondary); font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Sotuv: ${c.total_devices || 0} ta | $${parseFloat(c.total_revenue || 0).toFixed(2)}</span>
+              </div>
+              ${isActive}
+            </button>
+          `;
+        }).join('');
+
+        // Helper function to render a selected cashier's sales
+        const renderCashierSales = (cashier) => {
+          if (salesTitle) {
+            salesTitle.innerHTML = `<i class="fas fa-user-circle" style="margin-right:6px; color:var(--accent);"></i> <strong>${cashier.name}</strong> tomonidan sotilgan mahsulotlar`;
+          }
+          
+          if (!cashier.recent_sales || cashier.recent_sales.length === 0) {
+            cashierSalesTbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--color-text-secondary);padding:30px;">Hozircha ushbu kassir tomonidan sotuvlar amalga oshirilmagan</td></tr>`;
+          } else {
+            cashierSalesTbody.innerHTML = cashier.recent_sales.map(s => {
+              const date = new Date(s.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date(s.time).toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+              return `
+                <tr>
+                  <td><strong>${s.product_name}</strong></td>
+                  <td><code style="font-size:11px;">${s.model || 'N/A'}</code></td>
+                  <td>${s.quantity} ta</td>
+                  <td style="color:var(--accent); font-weight:600;">$${parseFloat(s.total_price).toFixed(2)}</td>
+                  <td style="font-size:12px; color:var(--color-text-secondary);">${date}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+        };
+
+        // Render first cashier by default
+        if (cashiers.length > 0) {
+          renderCashierSales(cashiers[0]);
+        }
+
+        // Attach click listeners to selectors
+        const buttons = selectorsContainer.querySelectorAll('.cashier-selector-btn');
+        buttons.forEach((btn, index) => {
+          btn.addEventListener('click', () => {
+            buttons.forEach(b => {
+              b.style.background = 'rgba(255,255,255,0.02)';
+              b.style.borderColor = 'rgba(255,255,255,0.06)';
+            });
+            btn.style.background = 'rgba(0, 242, 254, 0.08)';
+            btn.style.borderColor = 'rgba(0, 242, 254, 0.25)';
+            renderCashierSales(cashiers[index]);
+          });
+        });
+      }
+    }
+
     // Fetch and Load Sales History
     try {
       const salesHistory = await request('/sales/history', 'GET');
       const salesTbody = document.getElementById('sales-history-tbody');
       if (salesTbody) {
         if (salesHistory.length === 0) {
-          salesTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td></tr>`;
+          salesTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td></tr>`;
         } else {
           salesTbody.innerHTML = salesHistory.map(sale => `
             <tr>
@@ -653,9 +779,19 @@ async function loadDashboardData() {
                 </div>
               </td>
               <td><code>${sale.qr_code}</code></td>
+              <td>
+                <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">
+                  <i class="fas fa-store" style="font-size:11px;margin-right:4px;color:var(--accent);"></i>${sale.branch_name}
+                </span>
+              </td>
               <td>${sale.quantity} ta</td>
               <td style="color:var(--accent);font-weight:600;">$${parseFloat(sale.total_price).toFixed(2)}</td>
-              <td><span style="font-weight:500;">${sale.cashier}</span></td>
+              <td>
+                <span style="font-weight:500;">${sale.cashier}</span>
+                <div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;">
+                  <i class="fas ${sale.cashier_role === 'scanner' ? 'fa-barcode' : 'fa-user-tag'}" style="font-size:9px;margin-right:2px;color:var(--accent);"></i>${sale.cashier_role === 'scanner' ? 'Skaner qurilma' : 'Kassir'}
+                </div>
+              </td>
               <td style="font-size:12px;color:var(--color-text-secondary);">${new Date(sale.time).toLocaleString()}</td>
             </tr>
           `).join('');
@@ -700,6 +836,16 @@ async function loadDashboardData() {
                 <div style="text-align: right;">
                   <span style="color: var(--color-text-secondary);">O'rtacha check:</span>
                   <strong style="color: var(--accent); margin-left: 4px;">$${avgTicket}</strong>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 8px; margin-top: 2px;">
+                <div>
+                  <span style="color: var(--color-text-secondary);">Chiqim (Maosh):</span>
+                  <strong style="color: var(--color-danger); margin-left: 4px;">$${parseFloat(b.total_expenses || 0).toFixed(2)}</strong>
+                </div>
+                <div style="text-align: right;">
+                  <span style="color: var(--color-text-secondary);">Sof Foyda:</span>
+                  <strong style="color: #10b981; margin-left: 4px;">$${parseFloat(b.total_sales - (b.total_expenses || 0)).toFixed(2)}</strong>
                 </div>
               </div>
             </div>
@@ -878,23 +1024,35 @@ async function refreshPOSProducts(search = '') {
       return;
     }
 
-    container.innerHTML = products.map(p => `
-      <div class="product-card" data-id="${p.id}">
-        <div class="product-name">${p.model_name}</div>
-        <div class="product-specs" style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
-          RAM: ${p.specifications.ram || 'N/A'} | ROM: ${p.specifications.storage || 'N/A'} | ${p.specifications.color || 'N/A'}
+    container.innerHTML = products.map(p => {
+      const hasImage = p.specifications && p.specifications.image;
+      const imgHtml = hasImage 
+        ? `<img src="${p.specifications.image}" style="width:100%; height:100%; object-fit:cover;">`
+        : `<i class="fas fa-mobile-alt" style="font-size: 32px; color: var(--accent); opacity: 0.7;"></i>`;
+
+      return `
+        <div class="product-card" data-id="${p.id}" style="display: flex; flex-direction: column; min-height: 220px; justify-content: space-between;">
+          <div>
+            <div class="product-img-wrapper" style="width: 100%; height: 110px; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+              ${imgHtml}
+            </div>
+            <div class="product-name" style="font-weight: 600;">${p.model_name}</div>
+            <div class="product-specs" style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
+              RAM: ${p.specifications.ram || 'N/A'} | ROM: ${p.specifications.storage || 'N/A'} | ${p.specifications.color || 'N/A'}
+            </div>
+          </div>
+          <div class="product-meta" style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <span class="product-price" style="font-weight: 700; color: var(--accent);">$${parseFloat(p.retail_price).toFixed(2)}</span>
+            ${p.quantity === 0 
+              ? `<span style="font-size:10px;background:rgba(239,68,68,0.1);color:#ef4444;padding:2px 6px;border-radius:4px;font-weight:600;">Tugagan</span>`
+              : p.quantity < 5 
+                ? `<span style="font-size:10px;background:rgba(245,158,11,0.1);color:#f59e0b;padding:2px 6px;border-radius:4px;font-weight:600;">Kam (${p.quantity} ta)</span>`
+                : `<span style="font-size:10px;background:rgba(16,185,129,0.1);color:#10b981;padding:2px 6px;border-radius:4px;font-weight:600;">Sotuvda (${p.quantity} ta)</span>`
+            }
+          </div>
         </div>
-        <div class="product-meta" style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-          <span class="product-price" style="font-weight: 700; color: var(--accent);">$${parseFloat(p.retail_price).toFixed(2)}</span>
-          ${p.quantity === 0 
-            ? `<span style="font-size:10px;background:rgba(239,68,68,0.1);color:#ef4444;padding:2px 6px;border-radius:4px;font-weight:600;">Tugagan</span>`
-            : p.quantity < 5 
-              ? `<span style="font-size:10px;background:rgba(245,158,11,0.1);color:#f59e0b;padding:2px 6px;border-radius:4px;font-weight:600;">Kam (${p.quantity} ta)</span>`
-              : `<span style="font-size:10px;background:rgba(16,185,129,0.1);color:#10b981;padding:2px 6px;border-radius:4px;font-weight:600;">Sotuvda (${p.quantity} ta)</span>`
-          }
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     // Attach click events
     container.querySelectorAll('.product-card').forEach(card => {
@@ -1196,9 +1354,19 @@ async function loadWarehouseProducts() {
     tbody.innerHTML = products.map(p => `
       <tr>
         <td>
-          <div style="font-weight:600;font-size:15px;">${p.model_name}</div>
-          <div style="font-size:12px;color:var(--color-text-secondary);">
-            RAM: ${p.specifications.ram || 'N/A'} | Storage: ${p.specifications.storage || 'N/A'} | O'lchami: ${p.specifications.size || 'N/A'} | Rangi: ${p.specifications.color || 'N/A'}
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:40px; height:40px; border-radius:6px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+              ${p.specifications && p.specifications.image 
+                ? `<img src="${p.specifications.image}" style="width:100%; height:100%; object-fit:cover;">` 
+                : `<i class="fas fa-mobile-alt" style="color:var(--accent); opacity:0.6;"></i>`
+              }
+            </div>
+            <div>
+              <div style="font-weight:600;font-size:15px;">${p.model_name}</div>
+              <div style="font-size:12px;color:var(--color-text-secondary);">
+                RAM: ${p.specifications.ram || 'N/A'} | Storage: ${p.specifications.storage || 'N/A'} | O'lchami: ${p.specifications.size || 'N/A'} | Rangi: ${p.specifications.color || 'N/A'}
+              </div>
+            </div>
           </div>
         </td>
         <td><code style="color:var(--accent); font-weight:600;">${p.qr_code}</code></td>
@@ -1288,12 +1456,37 @@ async function openProductModal(prod = null, defaultQr = null, defaultBranchId =
     
     const select = document.getElementById('product-branch-id');
     if (select) select.value = prod.branch_id || '';
+
+    // Set product image
+    const imgBase64 = document.getElementById('product-image-base64');
+    const imgPreview = document.getElementById('product-image-preview');
+    const imgPreviewContainer = document.getElementById('product-image-preview-container');
+    if (imgBase64 && imgPreview && imgPreviewContainer) {
+      if (prod.specifications && prod.specifications.image) {
+        imgBase64.value = prod.specifications.image;
+        imgPreview.src = prod.specifications.image;
+        imgPreviewContainer.style.display = 'flex';
+      } else {
+        imgBase64.value = '';
+        imgPreview.src = '';
+        imgPreviewContainer.style.display = 'none';
+      }
+    }
   } else {
     title.setAttribute('data-i18n', 'modal_add_title');
     form.reset();
     document.getElementById('product-click-url').value = '';
     document.getElementById('product-id').value = '';
     document.getElementById('product-qr-code').disabled = false;
+
+    const imgBase64 = document.getElementById('product-image-base64');
+    const imgPreview = document.getElementById('product-image-preview');
+    const imgPreviewContainer = document.getElementById('product-image-preview-container');
+    if (imgBase64 && imgPreview && imgPreviewContainer) {
+      imgBase64.value = '';
+      imgPreview.src = '';
+      imgPreviewContainer.style.display = 'none';
+    }
 
     if (defaultQr) {
       document.getElementById('product-qr-code').value = defaultQr;
@@ -1336,7 +1529,8 @@ async function handleSaveProduct() {
       size: document.getElementById('product-size').value,
       ram: document.getElementById('product-ram').value,
       storage: document.getElementById('product-storage').value,
-      color: document.getElementById('product-color').value
+      color: document.getElementById('product-color').value,
+      image: document.getElementById('product-image-base64').value || ''
     }
   };
 
@@ -1704,6 +1898,9 @@ function applyThemeStyles(theme) {
   const pattern = theme.pattern || 'none';
   const bgImage = theme.bg_image || '';
 
+  // Always apply baseline background color
+  document.body.style.backgroundColor = 'var(--bg-primary)';
+
   if (bgImage) {
     document.body.style.backgroundAttachment = 'fixed';
     document.body.style.backgroundSize = 'cover';
@@ -1742,7 +1939,7 @@ function applyThemeStyles(theme) {
       document.body.style.backgroundSize = 'auto';
       document.body.style.backgroundPosition = 'auto';
     } else {
-      document.body.style.backgroundImage = 'none';
+      document.body.style.backgroundImage = 'var(--bg-gradient)';
     }
   }
 }
@@ -1923,6 +2120,69 @@ function setupEventListeners() {
   }
 
   document.getElementById('save-product-btn').addEventListener('click', handleSaveProduct);
+
+  // Product image upload listeners
+  const imgUploadBtn = document.getElementById('product-image-upload-btn');
+  const imgFileInput = document.getElementById('product-image-file');
+  const imgBase64Input = document.getElementById('product-image-base64');
+  const imgPreview = document.getElementById('product-image-preview');
+  const imgPreviewContainer = document.getElementById('product-image-preview-container');
+  const imgClearBtn = document.getElementById('product-image-clear-btn');
+
+  if (imgUploadBtn && imgFileInput) {
+    imgUploadBtn.addEventListener('click', () => imgFileInput.click());
+    
+    imgFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Compress the image using canvas
+          const canvas = document.createElement('canvas');
+          const maxDim = 300;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height *= maxDim / width;
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width *= maxDim / height;
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to JPEG base64 (quality 0.7)
+          const base64 = canvas.toDataURL('image/jpeg', 0.7);
+          imgBase64Input.value = base64;
+          imgPreview.src = base64;
+          imgPreviewContainer.style.display = 'flex';
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (imgClearBtn) {
+      imgClearBtn.addEventListener('click', () => {
+        imgFileInput.value = '';
+        imgBase64Input.value = '';
+        imgPreview.src = '';
+        imgPreviewContainer.style.display = 'none';
+      });
+    }
+  }
 
   // Staff modal actions
   document.getElementById('open-add-staff-modal').addEventListener('click', () => openStaffModal(null));
