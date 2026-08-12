@@ -1417,10 +1417,10 @@ async function loadWarehouseProducts() {
         <td><code style="color:var(--accent); font-weight:600;">${p.qr_code}</code></td>
         <td>
           ${p.quantity === 0 
-            ? `<span style="display:inline-block;font-size:11px;background:rgba(239,68,68,0.1);color:#ef4444;padding:4px 10px;border-radius:6px;font-weight:600;">Tugagan (0 ta)</span>`
+            ? `<span style="display:inline-block;font-size:14px;background:rgba(239,68,68,0.15);color:#ff4d4d;padding:6px 14px;border-radius:8px;font-weight:700;letter-spacing:0.5px;">Tugagan (0 ta)</span>`
             : p.quantity < 5 
-              ? `<span style="display:inline-block;font-size:11px;background:rgba(245,158,11,0.1);color:#f59e0b;padding:4px 10px;border-radius:6px;font-weight:600;">Kam qolgan (${p.quantity} ta)</span>`
-              : `<span style="display:inline-block;font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 10px;border-radius:6px;font-weight:600;">Sotuvda (${p.quantity} ta)</span>`
+              ? `<span style="display:inline-block;font-size:14px;background:rgba(245,158,11,0.15);color:#fbbf24;padding:6px 14px;border-radius:8px;font-weight:700;letter-spacing:0.5px;">Kam qolgan (${p.quantity} ta)</span>`
+              : `<span style="display:inline-block;font-size:14px;background:rgba(16,185,129,0.15);color:#10b981;padding:6px 14px;border-radius:8px;font-weight:700;letter-spacing:0.5px;">Sotuvda (${p.quantity} ta)</span>`
           }
         </td>
         ${currentUser.role === 'admin' ? `<td>$${parseFloat(p.purchase_price).toFixed(2)}</td>` : ''}
