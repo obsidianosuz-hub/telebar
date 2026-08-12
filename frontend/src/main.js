@@ -1312,6 +1312,19 @@ async function handleWarehouseScan() {
 async function handlePOSCheckout() {
   if (currentCart.length === 0) return;
 
+  let totalAmount = 0;
+  currentCart.forEach(item => {
+    totalAmount += item.retail_price * item.quantity;
+  });
+
+  const selectModal = document.getElementById('payment-selection-modal');
+  const amountEl = document.getElementById('pay-select-amount');
+  if (amountEl) amountEl.innerText = `$${totalAmount.toFixed(2)}`;
+
+  if (selectModal) selectModal.style.display = 'flex';
+}
+
+async function completePOSCheckout() {
   try {
     const res = await request('/sales/checkout', 'POST', { cart: currentCart });
     showToast(res.message);
@@ -2161,6 +2174,77 @@ function setupEventListeners() {
   if (closeClickPayBtn) {
     closeClickPayBtn.addEventListener('click', () => {
       document.getElementById('click-payment-modal').style.display = 'none';
+      const clickPaySuccessBtn = document.getElementById('click-pay-success-btn');
+      if (clickPaySuccessBtn) clickPaySuccessBtn.style.display = 'none';
+    });
+  }
+
+  // Payment selection modal actions
+  const paySelectModal = document.getElementById('payment-selection-modal');
+  const closePaySelectBtn = document.getElementById('close-pay-select-modal');
+  const payCashBtn = document.getElementById('pay-cash-btn');
+  const payClickBtn = document.getElementById('pay-click-btn');
+  const clickPaySuccessBtn = document.getElementById('click-pay-success-btn');
+
+  if (closePaySelectBtn) {
+    closePaySelectBtn.addEventListener('click', () => {
+      if (paySelectModal) paySelectModal.style.display = 'none';
+    });
+  }
+
+  if (payCashBtn) {
+    payCashBtn.addEventListener('click', () => {
+      if (paySelectModal) paySelectModal.style.display = 'none';
+      completePOSCheckout();
+    });
+  }
+
+  if (payClickBtn) {
+    payClickBtn.addEventListener('click', () => {
+      if (paySelectModal) paySelectModal.style.display = 'none';
+      
+      let totalAmount = 0;
+      currentCart.forEach(item => {
+        totalAmount += item.retail_price * item.quantity;
+      });
+
+      let paymentUrl = '';
+      if (currentSettings && currentSettings.click_config && currentSettings.click_config.active) {
+        const config = currentSettings.click_config;
+        paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=pos_sale_${Date.now()}`;
+      } else {
+        paymentUrl = `https://my.click.uz/services/pay?service_id=demo_service&merchant_id=demo_merchant&amount=${totalAmount.toFixed(2)}&transaction_param=demo_pos_sale_${Date.now()}`;
+      }
+
+      const clickModal = document.getElementById('click-payment-modal');
+      const clickSubtitle = document.getElementById('click-pay-subtitle');
+      const clickQr = document.getElementById('click-pay-qr');
+      const clickLink = document.getElementById('click-pay-link');
+
+      if (clickSubtitle) {
+        clickSubtitle.innerText = `Sotuv Savatchasi - $${totalAmount.toFixed(2)}`;
+      }
+      if (clickQr) {
+        clickQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(paymentUrl)}`;
+      }
+      if (clickLink) {
+        clickLink.href = paymentUrl;
+      }
+
+      if (clickPaySuccessBtn) {
+        clickPaySuccessBtn.style.display = 'inline-flex';
+      }
+
+      if (clickModal) clickModal.style.display = 'flex';
+    });
+  }
+
+  if (clickPaySuccessBtn) {
+    clickPaySuccessBtn.addEventListener('click', () => {
+      const clickModal = document.getElementById('click-payment-modal');
+      if (clickModal) clickModal.style.display = 'none';
+      clickPaySuccessBtn.style.display = 'none';
+      completePOSCheckout();
     });
   }
 
