@@ -22,6 +22,29 @@ class ClickPaymentController extends Controller
 
         Log::info("Click Webhook Received: Action {$action}, Trans {$clickTransId}, Amount {$amount}");
 
+        // Dispatch telemetry event when payment is completed (action = 1)
+        if ($action == 1) {
+            $url = env('REALTIME_SERVER_URL', 'http://localhost:3000') . '/api/telemetry';
+            try {
+                $ch = curl_init($url);
+                $payload = json_encode([
+                    'event' => 'click:paid',
+                    'data' => [
+                        'merchant_trans_id' => $merchantTransId,
+                        'amount' => $amount,
+                        'click_trans_id' => $clickTransId
+                    ]
+                ]);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_exec($ch);
+                curl_close($ch);
+            } catch (\Exception $e) {
+                Log::error("Failed to send Click payment telemetry: " . $e->getMessage());
+            }
+        }
+
         // Standard Click merchant response protocol
         return response()->json([
             'click_trans_id' => $clickTransId,

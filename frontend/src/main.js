@@ -474,6 +474,20 @@ function handleTelemetryEvent(event, data) {
       applyBrandingStyles(data.value);
     }
   }
+  
+  else if (event === 'click:paid') {
+    if (activeClickTransactionParam && data.merchant_trans_id === activeClickTransactionParam) {
+      showToast(`Click to'lovi muvaffaqiyatli qabul qilindi! Summa: $${data.amount}`, 'success');
+      
+      const clickModal = document.getElementById('click-payment-modal');
+      if (clickModal) clickModal.style.display = 'none';
+      const clickPaySuccessBtn = document.getElementById('click-pay-success-btn');
+      if (clickPaySuccessBtn) clickPaySuccessBtn.style.display = 'none';
+      
+      activeClickTransactionParam = '';
+      completePOSCheckout();
+    }
+  }
 }
 
 /**
@@ -1073,6 +1087,7 @@ async function refreshPOSProducts(search = '') {
 }
 
 let selectedPOSProduct = null;
+let activeClickTransactionParam = '';
 
 function openPOSProductDetailsModal(prod) {
   selectedPOSProduct = prod;
@@ -2209,11 +2224,17 @@ function setupEventListeners() {
       });
 
       let paymentUrl = '';
+      const txParam = (currentSettings && currentSettings.click_config && currentSettings.click_config.active) 
+        ? `pos_sale_${Date.now()}` 
+        : `demo_pos_sale_${Date.now()}`;
+      
+      activeClickTransactionParam = txParam;
+
       if (currentSettings && currentSettings.click_config && currentSettings.click_config.active) {
         const config = currentSettings.click_config;
-        paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=pos_sale_${Date.now()}`;
+        paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=${txParam}`;
       } else {
-        paymentUrl = `https://my.click.uz/services/pay?service_id=demo_service&merchant_id=demo_merchant&amount=${totalAmount.toFixed(2)}&transaction_param=demo_pos_sale_${Date.now()}`;
+        paymentUrl = `https://my.click.uz/services/pay?service_id=demo_service&merchant_id=demo_merchant&amount=${totalAmount.toFixed(2)}&transaction_param=${txParam}`;
       }
 
       const clickModal = document.getElementById('click-payment-modal');
