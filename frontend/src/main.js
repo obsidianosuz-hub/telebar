@@ -386,6 +386,8 @@ async function loginSuccess(user) {
       
       const actionsHeader = document.getElementById('wh-actions-header');
       if (actionsHeader) actionsHeader.style.display = 'none';
+      const purchaseHeader = document.getElementById('wh-purchase-header');
+      if (purchaseHeader) purchaseHeader.style.display = 'none';
       
       switchTab('pos');
     } else {
@@ -400,6 +402,8 @@ async function loginSuccess(user) {
       
       const actionsHeader = document.getElementById('wh-actions-header');
       if (actionsHeader) actionsHeader.style.display = 'table-cell';
+      const purchaseHeader = document.getElementById('wh-purchase-header');
+      if (purchaseHeader) purchaseHeader.style.display = 'table-cell';
       
       switchTab('dashboard');
     }
@@ -1419,7 +1423,7 @@ async function loadWarehouseProducts() {
               : `<span style="display:inline-block;font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;padding:4px 10px;border-radius:6px;font-weight:600;">Sotuvda (${p.quantity} ta)</span>`
           }
         </td>
-        <td>$${parseFloat(p.purchase_price).toFixed(2)}</td>
+        ${currentUser.role === 'admin' ? `<td>$${parseFloat(p.purchase_price).toFixed(2)}</td>` : ''}
         <td style="color:var(--accent);font-weight:600;">$${parseFloat(p.retail_price).toFixed(2)}</td>
         ${currentUser.role === 'admin' ? `
         <td>
@@ -2375,6 +2379,7 @@ function setupEventListeners() {
       const settings = document.getElementById('nav-set');
       const addBtn = document.getElementById('open-add-product-modal');
       const actionsHeader = document.getElementById('wh-actions-header');
+      const purchaseHeader = document.getElementById('wh-purchase-header');
       
       if (dash && dash.style.display !== 'none') dash.style.display = 'none';
       if (wh && wh.style.display !== 'block') wh.style.display = 'block';
@@ -2385,6 +2390,7 @@ function setupEventListeners() {
       if (settings && settings.style.display !== 'none') settings.style.display = 'none';
       if (addBtn && addBtn.style.display !== 'none') addBtn.style.display = 'none';
       if (actionsHeader && actionsHeader.style.display !== 'none') actionsHeader.style.display = 'none';
+      if (purchaseHeader && purchaseHeader.style.display !== 'none') purchaseHeader.style.display = 'none';
     }
   }, 100);
 }
