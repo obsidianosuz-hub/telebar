@@ -1059,17 +1059,58 @@ async function refreshPOSProducts(search = '') {
       card.addEventListener('click', () => {
         const prodId = card.getAttribute('data-id');
         const prod = products.find(p => p.id === prodId);
-        if (prod.quantity > 0) {
-          addToCart(prod);
-        } else {
-          showToast(dictionaries[getLanguage()].pos_out_of_stock, 'danger');
-        }
+        openPOSProductDetailsModal(prod);
       });
     });
 
   } catch (e) {
     showToast(e.message, 'danger');
   }
+}
+
+let selectedPOSProduct = null;
+
+function openPOSProductDetailsModal(prod) {
+  selectedPOSProduct = prod;
+  
+  const modal = document.getElementById('pos-product-details-modal');
+  if (!modal) return;
+  
+  document.getElementById('pos-detail-model-name').innerText = prod.model_name || '-';
+  document.getElementById('pos-detail-qr-code').innerText = prod.qr_code || '-';
+  document.getElementById('pos-detail-retail-price').innerText = `$${parseFloat(prod.retail_price).toFixed(2)}`;
+  
+  const qtyEl = document.getElementById('pos-detail-quantity');
+  if (prod.quantity === 0) {
+    qtyEl.innerHTML = `<span style="color:#ef4444; font-weight:600;">Tugagan</span>`;
+    document.getElementById('pos-detail-add-btn').disabled = true;
+    document.getElementById('pos-detail-add-btn').style.opacity = '0.5';
+  } else {
+    qtyEl.innerHTML = `<span style="color:#10b981; font-weight:600;">${prod.quantity} ta (Sotuvda)</span>`;
+    document.getElementById('pos-detail-add-btn').disabled = false;
+    document.getElementById('pos-detail-add-btn').style.opacity = '1';
+  }
+  
+  document.getElementById('pos-detail-ram').innerText = prod.specifications?.ram || 'N/A';
+  document.getElementById('pos-detail-storage').innerText = prod.specifications?.storage || 'N/A';
+  document.getElementById('pos-detail-color').innerText = prod.specifications?.color || 'N/A';
+  document.getElementById('pos-detail-size').innerText = prod.specifications?.size || 'N/A';
+  
+  const imgEl = document.getElementById('pos-detail-image');
+  const placeholderEl = document.getElementById('pos-detail-image-placeholder');
+  
+  if (prod.specifications && prod.specifications.image) {
+    imgEl.src = prod.specifications.image;
+    imgEl.style.display = 'block';
+    placeholderEl.style.display = 'none';
+  } else {
+    imgEl.src = '';
+    imgEl.style.display = 'none';
+    placeholderEl.style.display = 'flex';
+  }
+  
+  applyTranslations();
+  modal.style.display = 'flex';
 }
 
 function addToCart(product) {
@@ -2116,6 +2157,33 @@ function setupEventListeners() {
   if (closeClickPayBtn) {
     closeClickPayBtn.addEventListener('click', () => {
       document.getElementById('click-payment-modal').style.display = 'none';
+    });
+  }
+
+  // POS Product Details Modal Event Listeners
+  const posDetailModal = document.getElementById('pos-product-details-modal');
+  const closePosDetailBtn = document.getElementById('close-pos-detail-btn');
+  const cancelPosDetailBtn = document.getElementById('pos-detail-cancel-btn');
+  const addPosDetailBtn = document.getElementById('pos-detail-add-btn');
+
+  const closePOSDetails = () => {
+    if (posDetailModal) posDetailModal.style.display = 'none';
+    selectedPOSProduct = null;
+  };
+
+  if (closePosDetailBtn) closePosDetailBtn.addEventListener('click', closePOSDetails);
+  if (cancelPosDetailBtn) cancelPosDetailBtn.addEventListener('click', closePOSDetails);
+  
+  if (addPosDetailBtn) {
+    addPosDetailBtn.addEventListener('click', () => {
+      if (selectedPOSProduct) {
+        if (selectedPOSProduct.quantity > 0) {
+          addToCart(selectedPOSProduct);
+          closePOSDetails();
+        } else {
+          showToast(dictionaries[getLanguage()].pos_out_of_stock, 'danger');
+        }
+      }
     });
   }
 

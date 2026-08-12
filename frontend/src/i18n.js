@@ -155,7 +155,9 @@ export const dictionaries = {
     set_bg_image_label: "Orqa Fon Rasmi (Background Image)",
     set_bg_active: "Fon rasmi faol",
     field_product_image: "Smartfon Rasmi",
-    btn_choose_image: "Rasm tanlash"
+    btn_choose_image: "Rasm tanlash",
+    title_specs: "Texnik Xususiyatlari",
+    btn_add_to_cart: "Savatga qo'shish"
   },
   ru: {
     login_title: "POS-Терминал Telebar",
@@ -305,7 +307,9 @@ export const dictionaries = {
     set_bg_image_label: "Фоновое Изображение (Background Image)",
     set_bg_active: "Фоновый рисунок активен",
     field_product_image: "Фото смартфона",
-    btn_choose_image: "Выбрать фото"
+    btn_choose_image: "Выбрать фото",
+    title_specs: "Технические характеристики",
+    btn_add_to_cart: "Добавить в корзину"
   },
   en: {
     login_title: "Telebar POS Terminal",
@@ -455,7 +459,9 @@ export const dictionaries = {
     set_bg_image_label: "Background Image",
     set_bg_active: "Background image active",
     field_product_image: "Smartphone Image",
-    btn_choose_image: "Choose Image"
+    btn_choose_image: "Choose Image",
+    title_specs: "Technical Specifications",
+    btn_add_to_cart: "Add to Cart"
   }
 };
 
