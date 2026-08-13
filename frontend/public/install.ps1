@@ -1,5 +1,5 @@
 # Telebar Windows Desktop Installer
-$url = "http://172.23.122.97:5174"
+$url = "http://10.161.248.97:5174"
 $exeUrl = "$url/telebar.exe"
 $localDir = "$env:LOCALAPPDATA\Telebar"
 $exePath = "$localDir\telebar.exe"
