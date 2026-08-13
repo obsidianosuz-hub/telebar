@@ -1127,16 +1127,23 @@ function openPOSProductDetailsModal(prod) {
     imgEl.style.display = 'none';
     placeholderEl.style.display = 'flex';
   }
+
+  const qtyInput = document.getElementById('pos-detail-qty-input');
+  if (qtyInput) {
+    qtyInput.value = 1;
+    qtyInput.max = prod.quantity;
+    qtyInput.disabled = (prod.quantity === 0);
+  }
   
   applyTranslations();
   modal.style.display = 'flex';
 }
 
-function addToCart(product) {
+function addToCart(product, quantityToAdd = 1) {
   const existing = currentCart.find(item => item.product_id === product.id);
   if (existing) {
-    if (existing.quantity < product.quantity) {
-      existing.quantity += 1;
+    if (existing.quantity + quantityToAdd <= product.quantity) {
+      existing.quantity += quantityToAdd;
     } else {
       showToast(dictionaries[getLanguage()].pos_out_of_stock, 'danger');
     }
@@ -1145,7 +1152,7 @@ function addToCart(product) {
       product_id: product.id,
       model_name: product.model_name,
       retail_price: product.retail_price,
-      quantity: 1,
+      quantity: quantityToAdd,
       click_payment_url: product.click_payment_url || '',
       specifications: product.specifications || {}
     });
@@ -2283,11 +2290,45 @@ function setupEventListeners() {
   if (closePosDetailBtn) closePosDetailBtn.addEventListener('click', closePOSDetails);
   if (cancelPosDetailBtn) cancelPosDetailBtn.addEventListener('click', closePOSDetails);
   
+  const qtyDecBtn = document.getElementById('pos-detail-qty-dec');
+  const qtyIncBtn = document.getElementById('pos-detail-qty-inc');
+  const qtyInput = document.getElementById('pos-detail-qty-input');
+
+  if (qtyDecBtn && qtyInput) {
+    qtyDecBtn.addEventListener('click', () => {
+      let val = parseInt(qtyInput.value) || 1;
+      if (val > 1) {
+        qtyInput.value = val - 1;
+      }
+    });
+  }
+
+  if (qtyIncBtn && qtyInput) {
+    qtyIncBtn.addEventListener('click', () => {
+      let val = parseInt(qtyInput.value) || 1;
+      if (selectedPOSProduct && val < selectedPOSProduct.quantity) {
+        qtyInput.value = val + 1;
+      }
+    });
+  }
+
+  if (qtyInput) {
+    qtyInput.addEventListener('change', () => {
+      let val = parseInt(qtyInput.value) || 1;
+      if (val < 1) val = 1;
+      if (selectedPOSProduct && val > selectedPOSProduct.quantity) {
+        val = selectedPOSProduct.quantity;
+      }
+      qtyInput.value = val;
+    });
+  }
+  
   if (addPosDetailBtn) {
     addPosDetailBtn.addEventListener('click', () => {
       if (selectedPOSProduct) {
-        if (selectedPOSProduct.quantity > 0) {
-          addToCart(selectedPOSProduct);
+        const qtyVal = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+        if (selectedPOSProduct.quantity >= qtyVal && qtyVal > 0) {
+          addToCart(selectedPOSProduct, qtyVal);
           closePOSDetails();
         } else {
           showToast(dictionaries[getLanguage()].pos_out_of_stock, 'danger');

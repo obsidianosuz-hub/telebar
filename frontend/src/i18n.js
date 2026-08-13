@@ -157,6 +157,7 @@ export const dictionaries = {
     field_product_image: "Smartfon Rasmi",
     btn_choose_image: "Rasm tanlash",
     title_specs: "Texnik Xususiyatlari",
+    qty_input_hint: "Savatga qo'shiladigan miqdor",
     btn_add_to_cart: "Savatga qo'shish"
   },
   ru: {
@@ -309,6 +310,7 @@ export const dictionaries = {
     field_product_image: "Фото смартфона",
     btn_choose_image: "Выбрать фото",
     title_specs: "Технические характеристики",
+    qty_input_hint: "Количество для добавления",
     btn_add_to_cart: "Добавить в корзину"
   },
   en: {
@@ -461,6 +463,7 @@ export const dictionaries = {
     field_product_image: "Smartphone Image",
     btn_choose_image: "Choose Image",
     title_specs: "Technical Specifications",
+    qty_input_hint: "Quantity to add to cart",
     btn_add_to_cart: "Add to Cart"
   }
 };
