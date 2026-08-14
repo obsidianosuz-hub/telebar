@@ -1240,7 +1240,12 @@ function renderCart() {
       let paymentUrl = hardcodedUrl;
       if (!paymentUrl && currentSettings && currentSettings.click_config) {
         const config = currentSettings.click_config;
-        paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=${prodId}`;
+        if (config.card_number) {
+          const cleanCard = config.card_number.replace(/\s+/g, '');
+          paymentUrl = `https://my.click.uz/services/pay?service_id=3&merchant_id=${cleanCard}&amount=${totalAmount.toFixed(2)}&transaction_param=${prodId}`;
+        } else {
+          paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=${prodId}`;
+        }
       }
 
       openClickPayModal(model, totalAmount, paymentUrl);
@@ -2239,7 +2244,12 @@ function setupEventListeners() {
 
       if (currentSettings && currentSettings.click_config && currentSettings.click_config.active) {
         const config = currentSettings.click_config;
-        paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=${txParam}`;
+        if (config.card_number) {
+          const cleanCard = config.card_number.replace(/\s+/g, '');
+          paymentUrl = `https://my.click.uz/services/pay?service_id=3&merchant_id=${cleanCard}&amount=${totalAmount.toFixed(2)}&transaction_param=${txParam}`;
+        } else {
+          paymentUrl = `https://my.click.uz/services/pay?service_id=${config.service_id}&merchant_id=${config.merchant_id}&amount=${totalAmount.toFixed(2)}&transaction_param=${txParam}`;
+        }
       } else {
         paymentUrl = `https://my.click.uz/services/pay?service_id=demo_service&merchant_id=demo_merchant&amount=${totalAmount.toFixed(2)}&transaction_param=${txParam}`;
       }
