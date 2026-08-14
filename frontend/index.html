@@ -144,7 +144,6 @@
           <a class="nav-link" data-view="warehouse" id="nav-wh" draggable="true"><i class="fas fa-boxes" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_warehouse">Omborxona</span></a>
           <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" style="display: none;" draggable="true"><i class="fas fa-users" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_staff">Xodimlar</span></a>
           <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" style="display: none;" draggable="true"><i class="fas fa-store" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_branches">Ob'yektlar</span></a>
-          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_click">Click Integratsiya</span></a>
           <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_activities">Oxirgi Amallar</span></a>
           <a class="nav-link admin-only" data-view="settings" id="nav-set" style="display: none;" draggable="true"><i class="fas fa-cogs" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_settings">Sozlamalar</span></a>
         </nav>
@@ -539,92 +538,7 @@
 
 
 
-        <!-- 2EE. CLICK.UZ PAYMENT GATEWAY INTEGRATION -->
-        <section id="view-click-integration" class="tab-view" style="display: none;">
-          <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 15px;">
-              <div style="font-size: 28px; color: #00f2fe;"><i class="fas fa-credit-card"></i></div>
-              <div>
-                <h2 style="font-size: 20px; font-weight: 600; margin: 0; color: #ffffff;">Click.uz To'lov Integratsiyasi</h2>
-                <p style="font-size: 13px; color: var(--color-text-secondary); margin: 4px 0 0 0;">Qachonki Click to'lov tizimini ulamoqchi bo'lsangiz, merchant kalitlarini shu yerda kiriting va faollashtiring.</p>
-              </div>
-            </div>
 
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255,255,255,0.02); padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                <span style="font-weight: 600; color: #ffffff;">Click to'lov tizimini faollashtirish (Active)</span>
-                <input type="checkbox" id="click-active" style="width: 20px; height: 20px; accent-color: #00f2fe; cursor: pointer;">
-              </label>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-              <div class="form-group">
-                <label class="form-label">Merchant ID</label>
-                <input type="text" id="click-merchant-id" class="neo-input" placeholder="e.g. 12345">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Service ID</label>
-                <input type="text" id="click-service-id" class="neo-input" placeholder="e.g. 67890">
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-              <div class="form-group">
-                <label class="form-label">Merchant User ID</label>
-                <input type="text" id="click-user-id" class="neo-input" placeholder="e.g. 112233">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Secret Key / API Key</label>
-                <input type="password" id="click-secret-key" class="neo-input" placeholder="••••••••••••••••">
-              </div>
-            </div>
-
-            <div class="form-row" style="margin-bottom: 20px;">
-              <div class="form-group" style="flex: 1;">
-                <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 6px 0;">
-                  <span style="font-size: 13px; color: var(--color-text-secondary);">Sandbox (Test sinov rejimi)</span>
-                  <input type="checkbox" id="click-sandbox" style="width: 16px; height: 16px; accent-color: #00f2fe;">
-                </label>
-              </div>
-            </div>
-
-            <!-- Settlement Card Information -->
-            <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 12px; margin-bottom: 20px;">
-              <h4 style="margin: 0 0 12px 0; font-size: 14px; color: #ffffff; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-credit-card" style="color: var(--accent);"></i>
-                <span>Avtomatik To'lov Qabul Qiluvchi Karta (Settle Card)</span>
-              </h4>
-              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-                <div class="form-group">
-                  <label class="form-label">Karta Raqami (Card Number)</label>
-                  <input type="text" id="click-card-number" class="neo-input" placeholder="e.g. 8600 1234 5678 9012" maxlength="19">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Muddati (Expiry Date)</label>
-                  <input type="text" id="click-card-expiry" class="neo-input" placeholder="e.g. 12/28" maxlength="5">
-                </div>
-              </div>
-              <div class="form-group" style="margin-top: 15px;">
-                <label class="form-label">Karta Egasining Ism-Sharifi (Cardholder Full Name)</label>
-                <input type="text" id="click-card-holder" class="neo-input" placeholder="e.g. ABDURASUL A." style="text-transform: uppercase;">
-              </div>
-              <p style="font-size: 11px; color: var(--color-text-secondary); margin: 8px 0 0 0;">Ushbu karta Click.uz orqali amalga oshirilgan to'lovlarni avtomatik ravishda qabul qilish uchun xizmat qiladi.</p>
-            </div>
-
-            <div style="background: rgba(0, 242, 254, 0.03); border: 1px solid rgba(0, 242, 254, 0.15); padding: 15px; border-radius: 10px; margin-bottom: 25px;">
-              <h4 style="margin: 0 0 10px 0; font-size: 13px; color: var(--accent); font-weight: 600;"><i class="fas fa-link" style="margin-right: 6px;"></i> Click Webhook Manzili (URL)</h4>
-              <div style="display: flex; gap: 10px;">
-                <input type="text" class="neo-input" id="click-webhook-url" readonly value="http://127.0.0.1:8000/api/payments/click/webhook" style="font-family: monospace; font-size: 13px; background: rgba(0,0,0,0.2); flex: 1;">
-                <button class="btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('click-webhook-url').value); showToast('Nusxalandi!');" style="width: auto; white-space: nowrap; padding: 0 15px;"><i class="fas fa-copy"></i> Nusxalash</button>
-              </div>
-              <p style="font-size: 11px; color: var(--color-text-secondary); margin: 8px 0 0 0;">Ushbu webhook manzilini Click.uz Merchant kabinetida (Billing / Webhook URL) sozlamalarida ko'rsatishingiz shart.</p>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end;">
-              <button class="btn-primary" id="save-click-config-btn" style="width: auto; padding: 12px 30px;"><i class="fas fa-save" style="margin-right: 6px;"></i> Integratsiyani Saqlash</button>
-            </div>
-          </div>
-        </section>
 
         <!-- 2F. RECENT ACTIVITIES AUDIT LOG -->
         <section id="view-activities" class="tab-view" style="display: none;">
