@@ -722,7 +722,7 @@ async function loadDashboardData() {
         selectorsContainer.innerHTML = cashiers.map((c, index) => {
           const isActive = c.status === 'active' ? '<span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;margin-left:auto;"></span>' : '';
           return `
-            <button class="cashier-selector-btn" style="width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; background:${index === 0 ? 'rgba(0, 242, 254, 0.08)' : 'rgba(255,255,255,0.02)'}; border:1px solid ${index === 0 ? 'rgba(0, 242, 254, 0.25)' : 'rgba(255,255,255,0.06)'}; border-radius:10px; color:#ffffff; font-size:13px; font-weight:600; text-align:left; cursor:pointer; transition:all 0.2s; border-style:solid;">
+            <button class="cashier-selector-btn" style="width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; background:${index === 0 ? 'rgba(0, 242, 254, 0.12)' : 'var(--glass-bg)'}; border:1px solid ${index === 0 ? 'var(--accent)' : 'var(--glass-border)'}; border-radius:10px; color:var(--color-text-primary); font-size:13px; font-weight:600; text-align:left; cursor:pointer; transition:all 0.2s; border-style:solid;">
               <div style="width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:var(--accent);">
                 <i class="fas fa-user-tie"></i>
               </div>
@@ -769,11 +769,11 @@ async function loadDashboardData() {
         buttons.forEach((btn, index) => {
           btn.addEventListener('click', () => {
             buttons.forEach(b => {
-              b.style.background = 'rgba(255,255,255,0.02)';
-              b.style.borderColor = 'rgba(255,255,255,0.06)';
+              b.style.background = 'var(--glass-bg)';
+              b.style.borderColor = 'var(--glass-border)';
             });
-            btn.style.background = 'rgba(0, 242, 254, 0.08)';
-            btn.style.borderColor = 'rgba(0, 242, 254, 0.25)';
+            btn.style.background = 'rgba(0, 242, 254, 0.12)';
+            btn.style.borderColor = 'var(--accent)';
             renderCashierSales(cashiers[index]);
           });
         });
