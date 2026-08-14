@@ -2445,6 +2445,33 @@ function setupEventListeners() {
   document.getElementById('save-settings-btn').addEventListener('click', handleSaveSettings);
   document.getElementById('save-click-config-btn').addEventListener('click', handleSaveClickConfig);
 
+  const clickCardInput = document.getElementById('click-card-number');
+  if (clickCardInput) {
+    clickCardInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+      let formatted = '';
+      for (let i = 0; i < value.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+          formatted += ' ';
+        }
+        formatted += value[i];
+      }
+      e.target.value = formatted;
+    });
+  }
+
+  const clickExpiryInput = document.getElementById('click-card-expiry');
+  if (clickExpiryInput) {
+    clickExpiryInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\//g, '').replace(/[^0-9]/gi, '');
+      if (value.length > 2) {
+        e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+      } else {
+        e.target.value = value;
+      }
+    });
+  }
+
   // Background Upload / Clear actions
   const uploadBgBtn = document.getElementById('upload-bg-btn');
   const bgFileInput = document.getElementById('settings-theme-bg-file');
@@ -3160,7 +3187,9 @@ async function loadClickConfig() {
       service_id: '',
       user_id: '',
       secret_key: '',
-      sandbox: true
+      sandbox: true,
+      card_number: '',
+      card_expiry: ''
     };
     
     document.getElementById('click-active').checked = !!config.active;
@@ -3169,6 +3198,8 @@ async function loadClickConfig() {
     document.getElementById('click-user-id').value = config.user_id || '';
     document.getElementById('click-secret-key').value = config.secret_key || '';
     document.getElementById('click-sandbox').checked = !!config.sandbox;
+    document.getElementById('click-card-number').value = config.card_number || '';
+    document.getElementById('click-card-expiry').value = config.card_expiry || '';
   } catch (e) {
     showToast("Click sozlamalarini yuklashda xatolik: " + e.message, 'danger');
   }
@@ -3183,7 +3214,9 @@ async function handleSaveClickConfig() {
       service_id: document.getElementById('click-service-id').value.trim(),
       user_id: document.getElementById('click-user-id').value.trim(),
       secret_key: document.getElementById('click-secret-key').value.trim(),
-      sandbox: document.getElementById('click-sandbox').checked
+      sandbox: document.getElementById('click-sandbox').checked,
+      card_number: document.getElementById('click-card-number').value.trim(),
+      card_expiry: document.getElementById('click-card-expiry').value.trim()
     }
   };
 

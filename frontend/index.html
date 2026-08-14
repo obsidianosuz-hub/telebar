@@ -588,6 +588,25 @@
               </div>
             </div>
 
+            <!-- Settlement Card Information -->
+            <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 12px; margin-bottom: 20px;">
+              <h4 style="margin: 0 0 12px 0; font-size: 14px; color: #ffffff; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-credit-card" style="color: var(--accent);"></i>
+                <span>Avtomatik To'lov Qabul Qiluvchi Karta (Settle Card)</span>
+              </h4>
+              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div class="form-group">
+                  <label class="form-label">Karta Raqami (Card Number)</label>
+                  <input type="text" id="click-card-number" class="neo-input" placeholder="e.g. 8600 1234 5678 9012" maxlength="19">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Muddati (Expiry Date)</label>
+                  <input type="text" id="click-card-expiry" class="neo-input" placeholder="e.g. 12/28" maxlength="5">
+                </div>
+              </div>
+              <p style="font-size: 11px; color: var(--color-text-secondary); margin: 8px 0 0 0;">Ushbu karta Click.uz orqali amalga oshirilgan to'lovlarni avtomatik ravishda qabul qilish uchun xizmat qiladi.</p>
+            </div>
+
             <div style="background: rgba(0, 242, 254, 0.03); border: 1px solid rgba(0, 242, 254, 0.15); padding: 15px; border-radius: 10px; margin-bottom: 25px;">
               <h4 style="margin: 0 0 10px 0; font-size: 13px; color: var(--accent); font-weight: 600;"><i class="fas fa-link" style="margin-right: 6px;"></i> Click Webhook Manzili (URL)</h4>
               <div style="display: flex; gap: 10px;">
