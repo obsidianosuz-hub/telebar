@@ -3276,21 +3276,34 @@ async function loadClickConfig() {
       card_holder: ''
     };
     
-    document.getElementById('click-active').checked = !!config.active;
-    document.getElementById('click-merchant-id').value = config.merchant_id || '';
-    document.getElementById('click-service-id').value = config.service_id || '';
-    document.getElementById('click-user-id').value = config.user_id || '';
-    document.getElementById('click-secret-key').value = config.secret_key || '';
-    document.getElementById('click-sandbox').checked = !!config.sandbox;
-    document.getElementById('click-card-number').value = config.card_number || '';
-    document.getElementById('click-card-expiry').value = config.card_expiry || '';
-    document.getElementById('click-card-holder').value = config.card_holder || '';
+    const clickActiveEl = document.getElementById('click-active');
+    if (clickActiveEl) clickActiveEl.checked = !!config.active;
+    
+    const clickMerchantEl = document.getElementById('click-merchant-id');
+    if (clickMerchantEl) clickMerchantEl.value = config.merchant_id || '';
+    
+    const clickServiceEl = document.getElementById('click-service-id');
+    if (clickServiceEl) clickServiceEl.value = config.service_id || '';
+    
+    const clickUserEl = document.getElementById('click-user-id');
+    if (clickUserEl) clickUserEl.value = config.user_id || '';
+    
+    const clickSecretEl = document.getElementById('click-secret-key');
+    if (clickSecretEl) clickSecretEl.value = config.secret_key || '';
+    
+    const clickSandboxEl = document.getElementById('click-sandbox');
+    if (clickSandboxEl) clickSandboxEl.checked = !!config.sandbox;
   } catch (e) {
     showToast("Click sozlamalarini yuklashda xatolik: " + e.message, 'danger');
   }
 }
 
 async function handleSaveClickConfig() {
+  // Read current card values from settings page inputs as backup
+  const cardNum = document.getElementById('settings-click-card-number') ? document.getElementById('settings-click-card-number').value.trim() : '';
+  const cardExp = document.getElementById('settings-click-card-expiry') ? document.getElementById('settings-click-card-expiry').value.trim() : '';
+  const cardHold = document.getElementById('settings-click-card-holder') ? document.getElementById('settings-click-card-holder').value.trim() : '';
+
   const payload = {
     key: 'click_config',
     value: {
@@ -3300,9 +3313,9 @@ async function handleSaveClickConfig() {
       user_id: document.getElementById('click-user-id').value.trim(),
       secret_key: document.getElementById('click-secret-key').value.trim(),
       sandbox: document.getElementById('click-sandbox').checked,
-      card_number: document.getElementById('click-card-number').value.trim(),
-      card_expiry: document.getElementById('click-card-expiry').value.trim(),
-      card_holder: document.getElementById('click-card-holder').value.trim()
+      card_number: cardNum,
+      card_expiry: cardExp,
+      card_holder: cardHold
     }
   };
 
@@ -3310,6 +3323,15 @@ async function handleSaveClickConfig() {
     const res = await request('/settings', 'POST', payload);
     if (!currentSettings) currentSettings = {};
     currentSettings.click_config = payload.value;
+    
+    // Sync to settings page fields if they exist
+    const settingsActiveEl = document.getElementById('settings-click-active');
+    if (settingsActiveEl) settingsActiveEl.checked = payload.value.active;
+    const settingsMerchEl = document.getElementById('settings-click-merchant-id');
+    if (settingsMerchEl) settingsMerchEl.value = payload.value.merchant_id;
+    const settingsServEl = document.getElementById('settings-click-service-id');
+    if (settingsServEl) settingsServEl.value = payload.value.service_id;
+
     showToast(res.message || "Click sozlamalari muvaffaqiyatli saqlandi");
   } catch (e) {
     showToast("Click sozlamalarini saqlashda xatolik: " + e.message, 'danger');
