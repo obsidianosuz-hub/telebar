@@ -767,6 +767,51 @@
             <button class="btn-primary" id="save-settings-btn" style="margin-top: 10px;" data-i18n="btn_save_settings">Sozlamalarni Saqlash</button>
           </div>
 
+          <!-- Click.uz Payment Integration Card inside Settings -->
+          <div class="glass-card" style="margin-top: 24px;">
+            <h3 class="card-title text-accent" style="margin-bottom: 20px;">
+              <i class="fas fa-credit-card" style="margin-right: 8px;"></i>Click.uz Avtomatik To'lov Sozlamalari
+            </h3>
+            
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255,255,255,0.02); padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                <span style="font-weight: 600; color: #ffffff;">Click orqali to'lovni faollashtirish (Active)</span>
+                <input type="checkbox" id="settings-click-active" style="width: 20px; height: 20px; accent-color: #00f2fe; cursor: pointer;">
+              </label>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div class="form-group">
+                <label class="form-label">Karta Raqami / Hisob Raqam (Settlement Card Number)</label>
+                <input type="text" id="settings-click-card-number" class="neo-input" placeholder="e.g. 8600 1234 5678 9012" maxlength="19">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Muddati (Expiry Date)</label>
+                <input type="text" id="settings-click-card-expiry" class="neo-input" placeholder="e.g. 12/28" maxlength="5">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label class="form-label">Karta Egasining Ism-Sharifi (Cardholder Name)</label>
+              <input type="text" id="settings-click-card-holder" class="neo-input" placeholder="e.g. ABDURASUL A." style="text-transform: uppercase;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div class="form-group">
+                <label class="form-label">Merchant ID (ixtiyoriy)</label>
+                <input type="text" id="settings-click-merchant-id" class="neo-input" placeholder="e.g. 12345">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Service ID (ixtiyoriy)</label>
+                <input type="text" id="settings-click-service-id" class="neo-input" placeholder="e.g. 67890">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button class="btn-primary" id="settings-save-click-btn" style="width: auto; padding: 12px 30px;"><i class="fas fa-save" style="margin-right: 8px;"></i>Saqlash</button>
+            </div>
+          </div>
+
           <!-- Centralized User Accounts & Roles Management -->
           <div class="glass-card admin-only" style="margin-top: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

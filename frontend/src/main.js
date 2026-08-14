@@ -1910,6 +1910,26 @@ function applySystemSettings(settings) {
     document.getElementById('settings-day-start').value = settings.shift_timings.day_start || 8;
     document.getElementById('settings-day-end').value = settings.shift_timings.day_end || 20;
   }
+  if (settings.click_config) {
+    const config = settings.click_config;
+    const activeEl = document.getElementById('settings-click-active');
+    if (activeEl) activeEl.checked = !!config.active;
+    
+    const holderEl = document.getElementById('settings-click-card-holder');
+    if (holderEl) holderEl.value = config.card_holder || '';
+    
+    const numEl = document.getElementById('settings-click-card-number');
+    if (numEl) numEl.value = config.card_number || '';
+    
+    const expEl = document.getElementById('settings-click-card-expiry');
+    if (expEl) expEl.value = config.card_expiry || '';
+    
+    const merEl = document.getElementById('settings-click-merchant-id');
+    if (merEl) merEl.value = config.merchant_id || '';
+    
+    const serEl = document.getElementById('settings-click-service-id');
+    if (serEl) serEl.value = config.service_id || '';
+  }
 }
 
 function applyThemeStyles(theme) {
@@ -2475,6 +2495,38 @@ function setupEventListeners() {
   // Settings save
   document.getElementById('save-settings-btn').addEventListener('click', handleSaveSettings);
   document.getElementById('save-click-config-btn').addEventListener('click', handleSaveClickConfig);
+
+  const settingsClickSaveBtn = document.getElementById('settings-save-click-btn');
+  if (settingsClickSaveBtn) {
+    settingsClickSaveBtn.addEventListener('click', handleSaveClickSettings);
+  }
+
+  const settingsClickCardInput = document.getElementById('settings-click-card-number');
+  if (settingsClickCardInput) {
+    settingsClickCardInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+      let formatted = '';
+      for (let i = 0; i < value.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+          formatted += ' ';
+        }
+        formatted += value[i];
+      }
+      e.target.value = formatted;
+    });
+  }
+
+  const settingsClickExpiryInput = document.getElementById('settings-click-card-expiry');
+  if (settingsClickExpiryInput) {
+    settingsClickExpiryInput.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\//g, '').replace(/[^0-9]/gi, '');
+      if (value.length > 2) {
+        e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+      } else {
+        e.target.value = value;
+      }
+    });
+  }
 
   const clickCardInput = document.getElementById('click-card-number');
   if (clickCardInput) {
@@ -3259,6 +3311,42 @@ async function handleSaveClickConfig() {
     if (!currentSettings) currentSettings = {};
     currentSettings.click_config = payload.value;
     showToast(res.message || "Click sozlamalari muvaffaqiyatli saqlandi");
+  } catch (e) {
+    showToast("Click sozlamalarini saqlashda xatolik: " + e.message, 'danger');
+  }
+}
+
+async function handleSaveClickSettings() {
+  const click_config = {
+    active: document.getElementById('settings-click-active').checked,
+    card_holder: document.getElementById('settings-click-card-holder').value.trim(),
+    card_number: document.getElementById('settings-click-card-number').value.trim(),
+    card_expiry: document.getElementById('settings-click-card-expiry').value.trim(),
+    merchant_id: document.getElementById('settings-click-merchant-id').value.trim(),
+    service_id: document.getElementById('settings-click-service-id').value.trim(),
+    sandbox: true
+  };
+
+  try {
+    const res = await request('/settings', 'POST', { key: 'click_config', value: click_config });
+    if (!currentSettings) currentSettings = {};
+    currentSettings.click_config = click_config;
+    
+    // Sync to other fields if they exist
+    const clickActiveEl = document.getElementById('click-active');
+    if (clickActiveEl) clickActiveEl.checked = click_config.active;
+    const clickMerchEl = document.getElementById('click-merchant-id');
+    if (clickMerchEl) clickMerchEl.value = click_config.merchant_id;
+    const clickServEl = document.getElementById('click-service-id');
+    if (clickServEl) clickServEl.value = click_config.service_id;
+    const clickCardEl = document.getElementById('click-card-number');
+    if (clickCardEl) clickCardEl.value = click_config.card_number;
+    const clickExpEl = document.getElementById('click-card-expiry');
+    if (clickExpEl) clickExpEl.value = click_config.card_expiry;
+    const clickHoldEl = document.getElementById('click-card-holder');
+    if (clickHoldEl) clickHoldEl.value = click_config.card_holder;
+
+    showToast(res.message || "Click sozlamalari saqlandi");
   } catch (e) {
     showToast("Click sozlamalarini saqlashda xatolik: " + e.message, 'danger');
   }
