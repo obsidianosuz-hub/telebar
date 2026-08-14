@@ -2527,11 +2527,7 @@ function setupEventListeners() {
       const target = btn.getAttribute('data-subtab');
       const targetContent = document.getElementById(`subtab-content-${target}`);
       if (targetContent) {
-        if (target === 'design') {
-          targetContent.style.display = 'grid';
-        } else {
-          targetContent.style.display = 'block';
-        }
+        targetContent.style.display = 'block';
       }
     });
   });

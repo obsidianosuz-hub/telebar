@@ -655,81 +655,85 @@
           </div>
 
           <!-- Subtab 1: Design & Branding -->
-          <div id="subtab-content-design" class="settings-subtab-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-            <div class="glass-card">
-              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_branding_group">Brending Sozlamalari</h3>
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_brand_name">Tizim nomi</label>
-                <input type="text" id="settings-brand-name" class="neo-input">
-              </div>
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_logo_url">Logo URL manzili</label>
-                <input type="text" id="settings-logo-url" class="neo-input">
+          <div id="subtab-content-design" class="settings-subtab-content" style="display: block;">
+            <div class="glass-card" style="margin-bottom: 24px;">
+              <h3 class="card-title text-accent" style="margin-bottom: 12px;" data-i18n="set_language_group">Tizim Tili (Language)</h3>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                <div style="font-size: 13px; color: var(--color-text-secondary);" data-i18n="set_lang_desc">Interfeysning asosiy tilini belgilang:</div>
+                <div class="lang-selector" style="max-width: 250px; margin: 0;">
+                  <button class="lang-btn" data-lang="uz">UZ</button>
+                  <button class="lang-btn" data-lang="ru">RU</button>
+                  <button class="lang-btn" data-lang="en">EN</button>
+                </div>
               </div>
             </div>
 
-            <div class="glass-card">
-              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_theme_group">Vizual Mavzular va Muhit</h3>
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_accent_color">Urg'u rangi (Accent Color)</label>
-                <input type="color" id="settings-accent-color" class="neo-input" style="height: 40px; padding: 2px; cursor: pointer;">
-              </div>
-              <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label" data-i18n="set_preset">Dizayn Qolipi (UI Preset)</label>
-                <select id="settings-ui-preset" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="glassmorphism" data-i18n="opt_preset_glassmorphism">Glassmorphism (Glassmorphic Glow)</option>
-                  <option value="neomorphism" data-i18n="opt_preset_neomorphism">Neomorphism (Neomorphic Matte)</option>
-                  <option value="cyberpunk" data-i18n="opt_preset_cyberpunk">Cyberpunk (Cyberpunk Neon Glow)</option>
-                  <option value="minimalist" data-i18n="opt_preset_minimalist">Minimalist (Minimalist Classic)</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label" data-i18n="set_mood_label">Muhit & Hissiyot Ranglari (Ambient Mood)</label>
-                <select id="settings-theme-mood" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="deep_space" data-i18n="opt_mood_deep_space">Deep Space (Kosmik qora-ko'k)</option>
-                  <option value="emerald_forest" data-i18n="opt_mood_emerald_forest">Emerald Forest (Zumrad yashil)</option>
-                  <option value="sunset_glow" data-i18n="opt_mood_sunset_glow">Sunset Glow (Issiq quyosh botishi qizil)</option>
-                  <option value="midnight_indigo" data-i18n="opt_mood_midnight_indigo">Midnight Indigo (To'q binafsha-indigo)</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label" data-i18n="set_pattern_label">Orqa Fon Tasvirlari / Grid (Pattern)</label>
-                <select id="settings-theme-pattern" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="none" data-i18n="opt_pattern_none">Oddiy (Solid Color)</option>
-                  <option value="geometric_grid" data-i18n="opt_pattern_grid">Geometrik Panjara (Tech Grid)</option>
-                  <option value="stars_space" data-i18n="opt_pattern_stars">Yulduzlar (Stardust Dots)</option>
-                  <option value="diagonal_cyber" data-i18n="opt_pattern_diagonal">Kiber Chiziqlar (Diagonal Tech Stripes)</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label" data-i18n="set_bg_image_label">Orqa Fon Rasmi (Background Image)</label>
-                <input type="hidden" id="settings-theme-bg-image">
-                <input type="file" id="settings-theme-bg-file" accept="image/*" style="display: none;">
-                <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
-                  <button type="button" class="btn-primary" id="upload-bg-btn" style="width: auto; padding: 10px 20px;"><i class="fas fa-upload" style="margin-right: 8px;"></i><span data-i18n="btn_upload_bg">Rasm yuklash</span></button>
-                  <button type="button" class="btn-secondary" id="clear-bg-btn" style="width: auto; padding: 10px 20px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);" title="Fon rasmini o'chirish"><i class="fas fa-trash-alt" style="margin-right: 8px;"></i><span data-i18n="btn_clear_bg">O'chirish</span></button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+              <div class="glass-card">
+                <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_branding_group">Brending Sozlamalari</h3>
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_brand_name">Tizim nomi</label>
+                  <input type="text" id="settings-brand-name" class="neo-input">
                 </div>
-                <div id="settings-theme-bg-preview-container" style="margin-top: 10px; display: none; align-items: center; gap: 10px;">
-                  <img id="settings-theme-bg-preview" src="" style="width: 80px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
-                  <span style="font-size: 12px; color: var(--color-text-secondary);" data-i18n="set_bg_active">Fon rasmi faol</span>
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_logo_url">Logo URL manzili</label>
+                  <input type="text" id="settings-logo-url" class="neo-input">
                 </div>
               </div>
-              <div class="form-group" style="margin-top: 10px;">
-                <label class="form-label" data-i18n="set_theme_mode">Tun-Kun rejimi (Theme Mode)</label>
-                <select id="settings-theme-mode" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
-                  <option value="dark" data-i18n="opt_mode_dark">Tun (Dark Mode)</option>
-                  <option value="light" data-i18n="opt_mode_light">Kun (Light Mode)</option>
-                </select>
-              </div>
-            </div>
 
-            <div class="glass-card">
-              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_language_group">Tizim Tili (Language)</h3>
-              <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 16px;" data-i18n="set_lang_desc">Interfeysning asosiy tilini belgilang:</div>
-              <div class="lang-selector" style="max-width: 250px;">
-                <button class="lang-btn" data-lang="uz">UZ</button>
-                <button class="lang-btn" data-lang="ru">RU</button>
-                <button class="lang-btn" data-lang="en">EN</button>
+              <div class="glass-card">
+                <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_theme_group">Vizual Mavzular va Muhit</h3>
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_accent_color">Urg'u rangi (Accent Color)</label>
+                  <input type="color" id="settings-accent-color" class="neo-input" style="height: 40px; padding: 2px; cursor: pointer;">
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                  <label class="form-label" data-i18n="set_preset">Dizayn Qolipi (UI Preset)</label>
+                  <select id="settings-ui-preset" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                    <option value="glassmorphism" data-i18n="opt_preset_glassmorphism">Glassmorphism (Glassmorphic Glow)</option>
+                    <option value="neomorphism" data-i18n="opt_preset_neomorphism">Neomorphism (Neomorphic Matte)</option>
+                    <option value="cyberpunk" data-i18n="opt_preset_cyberpunk">Cyberpunk (Cyberpunk Neon Glow)</option>
+                    <option value="minimalist" data-i18n="opt_preset_minimalist">Minimalist (Minimalist Classic)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                  <label class="form-label" data-i18n="set_mood_label">Muhit & Hissiyot Ranglari (Ambient Mood)</label>
+                  <select id="settings-theme-mood" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                    <option value="deep_space" data-i18n="opt_mood_deep_space">Deep Space (Kosmik qora-ko'k)</option>
+                    <option value="emerald_forest" data-i18n="opt_mood_emerald_forest">Emerald Forest (Zumrad yashil)</option>
+                    <option value="sunset_glow" data-i18n="opt_mood_sunset_glow">Sunset Glow (Issiq quyosh botishi qizil)</option>
+                    <option value="midnight_indigo" data-i18n="opt_mood_midnight_indigo">Midnight Indigo (To'q binafsha-indigo)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                  <label class="form-label" data-i18n="set_pattern_label">Orqa Fon Tasvirlari / Grid (Pattern)</label>
+                  <select id="settings-theme-pattern" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                    <option value="none" data-i18n="opt_pattern_none">Oddiy (Solid Color)</option>
+                    <option value="geometric_grid" data-i18n="opt_pattern_grid">Geometrik Panjara (Tech Grid)</option>
+                    <option value="stars_space" data-i18n="opt_pattern_stars">Yulduzlar (Stardust Dots)</option>
+                    <option value="diagonal_cyber" data-i18n="opt_pattern_diagonal">Kiber Chiziqlar (Diagonal Tech Stripes)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                  <label class="form-label" data-i18n="set_bg_image_label">Orqa Fon Rasmi (Background Image)</label>
+                  <input type="hidden" id="settings-theme-bg-image">
+                  <input type="file" id="settings-theme-bg-file" accept="image/*" style="display: none;">
+                  <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+                    <button type="button" class="btn-primary" id="upload-bg-btn" style="width: auto; padding: 10px 20px;"><i class="fas fa-upload" style="margin-right: 8px;"></i><span data-i18n="btn_upload_bg">Rasm yuklash</span></button>
+                    <button type="button" class="btn-secondary" id="clear-bg-btn" style="width: auto; padding: 10px 20px; color: var(--color-danger); border-color: rgba(239,68,68,0.2);" title="Fon rasmini o'chirish"><i class="fas fa-trash-alt" style="margin-right: 8px;"></i><span data-i18n="btn_clear_bg">O'chirish</span></button>
+                  </div>
+                  <div id="settings-theme-bg-preview-container" style="margin-top: 10px; display: none; align-items: center; gap: 10px;">
+                    <img id="settings-theme-bg-preview" src="" style="width: 80px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid var(--glass-border);">
+                    <span style="font-size: 12px; color: var(--color-text-secondary);" data-i18n="set_bg_active">Fon rasmi faol</span>
+                  </div>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                  <label class="form-label" data-i18n="set_theme_mode">Tun-Kun rejimi (Theme Mode)</label>
+                  <select id="settings-theme-mode" class="neo-input" style="background: var(--bg-secondary); width: 100%;">
+                    <option value="dark" data-i18n="opt_mode_dark">Tun (Dark Mode)</option>
+                    <option value="light" data-i18n="opt_mode_light">Kun (Light Mode)</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
