@@ -604,6 +604,10 @@
                   <input type="text" id="click-card-expiry" class="neo-input" placeholder="e.g. 12/28" maxlength="5">
                 </div>
               </div>
+              <div class="form-group" style="margin-top: 15px;">
+                <label class="form-label">Karta Egasining Ism-Sharifi (Cardholder Full Name)</label>
+                <input type="text" id="click-card-holder" class="neo-input" placeholder="e.g. ABDURASUL A." style="text-transform: uppercase;">
+              </div>
               <p style="font-size: 11px; color: var(--color-text-secondary); margin: 8px 0 0 0;">Ushbu karta Click.uz orqali amalga oshirilgan to'lovlarni avtomatik ravishda qabul qilish uchun xizmat qiladi.</p>
             </div>
 
@@ -1064,7 +1068,8 @@
           <i class="fas fa-qrcode"></i>
         </div>
         <h3 id="click-pay-title" style="font-size: 18px; font-weight: 600; margin-bottom: 6px; color: #ffffff;">Click.uz QR To'lov</h3>
-        <p id="click-pay-subtitle" style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 20px;">Smartphone - $0.00</p>
+        <p id="click-pay-subtitle" style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">Smartphone - $0.00</p>
+        <div id="click-pay-holder" style="font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; display: none;">Karta egasi: -</div>
         
         <div style="background: #ffffff; padding: 15px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 20px rgba(0,0,0,0.15); margin-bottom: 20px;">
           <img id="click-pay-qr" src="" style="width: 220px; height: 220px; display: block;" alt="Click Payment QR Code">

@@ -1257,6 +1257,16 @@ function openClickPayModal(model, amount, paymentUrl) {
   const modal = document.getElementById('click-payment-modal');
   document.getElementById('click-pay-subtitle').innerText = `${model} - $${parseFloat(amount).toFixed(2)}`;
   
+  const clickHolderEl = document.getElementById('click-pay-holder');
+  if (clickHolderEl) {
+    if (currentSettings && currentSettings.click_config && currentSettings.click_config.card_holder) {
+      clickHolderEl.innerText = `Karta egasi: ${currentSettings.click_config.card_holder}`;
+      clickHolderEl.style.display = 'block';
+    } else {
+      clickHolderEl.style.display = 'none';
+    }
+  }
+
   const qrImage = document.getElementById('click-pay-qr');
   qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(paymentUrl)}`;
   
@@ -2262,6 +2272,17 @@ function setupEventListeners() {
       if (clickSubtitle) {
         clickSubtitle.innerText = `Sotuv Savatchasi - $${totalAmount.toFixed(2)}`;
       }
+      
+      const clickHolderEl = document.getElementById('click-pay-holder');
+      if (clickHolderEl) {
+        if (currentSettings && currentSettings.click_config && currentSettings.click_config.card_holder) {
+          clickHolderEl.innerText = `Karta egasi: ${currentSettings.click_config.card_holder}`;
+          clickHolderEl.style.display = 'block';
+        } else {
+          clickHolderEl.style.display = 'none';
+        }
+      }
+
       if (clickQr) {
         clickQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(paymentUrl)}`;
       }
@@ -3199,7 +3220,8 @@ async function loadClickConfig() {
       secret_key: '',
       sandbox: true,
       card_number: '',
-      card_expiry: ''
+      card_expiry: '',
+      card_holder: ''
     };
     
     document.getElementById('click-active').checked = !!config.active;
@@ -3210,6 +3232,7 @@ async function loadClickConfig() {
     document.getElementById('click-sandbox').checked = !!config.sandbox;
     document.getElementById('click-card-number').value = config.card_number || '';
     document.getElementById('click-card-expiry').value = config.card_expiry || '';
+    document.getElementById('click-card-holder').value = config.card_holder || '';
   } catch (e) {
     showToast("Click sozlamalarini yuklashda xatolik: " + e.message, 'danger');
   }
@@ -3226,7 +3249,8 @@ async function handleSaveClickConfig() {
       secret_key: document.getElementById('click-secret-key').value.trim(),
       sandbox: document.getElementById('click-sandbox').checked,
       card_number: document.getElementById('click-card-number').value.trim(),
-      card_expiry: document.getElementById('click-card-expiry').value.trim()
+      card_expiry: document.getElementById('click-card-expiry').value.trim(),
+      card_holder: document.getElementById('click-card-holder').value.trim()
     }
   };
 
