@@ -2501,6 +2501,41 @@ function setupEventListeners() {
     settingsClickSaveBtn.addEventListener('click', handleSaveClickSettings);
   }
 
+  // Settings subtab switching
+  document.querySelectorAll('.settings-subtab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Reset all buttons
+      document.querySelectorAll('.settings-subtab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.color = 'var(--color-text-secondary)';
+        b.style.borderBottomColor = 'transparent';
+        b.style.fontWeight = '500';
+      });
+
+      // Activate clicked button
+      btn.classList.add('active');
+      btn.style.color = 'var(--accent)';
+      btn.style.borderBottomColor = 'var(--accent)';
+      btn.style.fontWeight = '600';
+
+      // Hide all contents
+      document.querySelectorAll('.settings-subtab-content').forEach(content => {
+        content.style.display = 'none';
+      });
+
+      // Show target content
+      const target = btn.getAttribute('data-subtab');
+      const targetContent = document.getElementById(`subtab-content-${target}`);
+      if (targetContent) {
+        if (target === 'design') {
+          targetContent.style.display = 'grid';
+        } else {
+          targetContent.style.display = 'block';
+        }
+      }
+    });
+  });
+
   const settingsClickCardInput = document.getElementById('settings-click-card-number');
   if (settingsClickCardInput) {
     settingsClickCardInput.addEventListener('input', (e) => {

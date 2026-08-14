@@ -641,7 +641,21 @@
         <section id="view-settings" class="tab-view" style="display: none;">
           <h2 class="card-title" style="font-size: 18px; margin-bottom: 24px;" data-i18n="settings_title">Tizim Sozlamalari</h2>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <!-- Sub-navigation tabs inside Settings -->
+          <div class="settings-subtabs" style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; overflow-x: auto;">
+            <button class="settings-subtab-btn active" data-subtab="design" style="background: transparent; border: none; color: var(--accent); font-weight: 600; padding: 8px 16px; border-bottom: 2px solid var(--accent); cursor: pointer; transition: all 0.3s ease; white-space: nowrap;">
+              <i class="fas fa-palette" style="margin-right: 6px;"></i>Dizayn & Brending
+            </button>
+            <button class="settings-subtab-btn" data-subtab="users" style="background: transparent; border: none; color: var(--color-text-secondary); font-weight: 500; padding: 8px 16px; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.3s ease; white-space: nowrap;">
+              <i class="fas fa-users-cog" style="margin-right: 6px;"></i>Xodimlar & Ish haqi
+            </button>
+            <button class="settings-subtab-btn" data-subtab="click" style="background: transparent; border: none; color: var(--color-text-secondary); font-weight: 500; padding: 8px 16px; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.3s ease; white-space: nowrap;">
+              <i class="fas fa-credit-card" style="margin-right: 6px;"></i>Click To'lovlari
+            </button>
+          </div>
+
+          <!-- Subtab 1: Design & Branding -->
+          <div id="subtab-content-design" class="settings-subtab-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
             <div class="glass-card">
               <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_branding_group">Brending Sozlamalari</h3>
               <div class="form-group">
@@ -720,99 +734,104 @@
             </div>
           </div>
 
-          <div class="glass-card" style="margin-top: 24px;">
-            <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_salary_rules">Ish Haqi Qoidalari</h3>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_hourly_rate">Kassirlar bazaviy soatlik stavkasi ($)</label>
-                <input type="number" id="settings-hourly-rate" class="neo-input">
+          <!-- Subtab 2: Users & Salary -->
+          <div id="subtab-content-users" class="settings-subtab-content" style="display: none;">
+            <div class="glass-card" style="margin-bottom: 24px;">
+              <h3 class="card-title text-accent" style="margin-bottom: 20px;" data-i18n="set_salary_rules">Ish Haqi Qoidalari</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_hourly_rate">Kassirlar bazaviy soatlik stavkasi ($)</label>
+                  <input type="number" id="settings-hourly-rate" class="neo-input">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_night_multiplier">Tungi shift koeffitsiyenti (X)</label>
+                  <input type="number" id="settings-night-multiplier" step="0.1" class="neo-input">
+                </div>
               </div>
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_night_multiplier">Tungi shift koeffitsiyenti (X)</label>
-                <input type="number" id="settings-night-multiplier" step="0.1" class="neo-input">
+              <div class="form-row" style="margin-top: 16px; margin-bottom: 16px;">
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_day_start">Kunduzgi shift boshlanishi (Soat 0-23)</label>
+                  <input type="number" id="settings-day-start" min="0" max="23" class="neo-input" placeholder="8">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" data-i18n="set_day_end">Kunduzgi shift tugashi (Soat 0-23)</label>
+                  <input type="number" id="settings-day-end" min="0" max="23" class="neo-input" placeholder="20">
+                </div>
               </div>
-            </div>
-            <div class="form-row" style="margin-top: 16px;">
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_day_start">Kunduzgi shift boshlanishi (Soat 0-23)</label>
-                <input type="number" id="settings-day-start" min="0" max="23" class="neo-input" placeholder="8">
-              </div>
-              <div class="form-group">
-                <label class="form-label" data-i18n="set_day_end">Kunduzgi shift tugashi (Soat 0-23)</label>
-                <input type="number" id="settings-day-end" min="0" max="23" class="neo-input" placeholder="20">
-              </div>
-            </div>
-            
-            <button class="btn-primary" id="save-settings-btn" style="margin-top: 10px;" data-i18n="btn_save_settings">Sozlamalarni Saqlash</button>
-          </div>
-
-          <!-- Click.uz Payment Integration Card inside Settings -->
-          <div class="glass-card" style="margin-top: 24px;">
-            <h3 class="card-title text-accent" style="margin-bottom: 20px;">
-              <i class="fas fa-credit-card" style="margin-right: 8px;"></i>Click.uz Avtomatik To'lov Sozlamalari
-            </h3>
-            
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255,255,255,0.02); padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                <span style="font-weight: 600; color: #ffffff;">Click orqali to'lovni faollashtirish (Active)</span>
-                <input type="checkbox" id="settings-click-active" style="width: 20px; height: 20px; accent-color: #00f2fe; cursor: pointer;">
-              </label>
+              
+              <button class="btn-primary" id="save-settings-btn" style="margin-top: 10px;" data-i18n="btn_save_settings">Sozlamalarni Saqlash</button>
             </div>
 
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
-              <div class="form-group">
-                <label class="form-label">Karta Raqami / Hisob Raqam (Settlement Card Number)</label>
-                <input type="text" id="settings-click-card-number" class="neo-input" placeholder="e.g. 8600 1234 5678 9012" maxlength="19">
+            <!-- Centralized User Accounts & Roles Management -->
+            <div class="glass-card admin-only">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 class="card-title text-accent"><i class="fas fa-users-cog" style="margin-right: 8px;"></i>Tizim Foydalanuvchilari va Rollar</h3>
+                <button class="btn-primary" id="open-add-user-modal" style="width: auto; padding: 6px 16px; font-size: 13px;">Yangi foydalanuvchi qo'shish</button>
               </div>
-              <div class="form-group">
-                <label class="form-label">Muddati (Expiry Date)</label>
-                <input type="text" id="settings-click-card-expiry" class="neo-input" placeholder="e.g. 12/28" maxlength="5">
+              
+              <div class="table-responsive">
+                <table class="neo-table">
+                  <thead>
+                    <tr>
+                      <th>Foydalanuvchi</th>
+                      <th>Gmail (Login)</th>
+                      <th>Rol (Ruxsatlar)</th>
+                      <th>Filial (Joylashuv)</th>
+                      <th>Amallar</th>
+                    </tr>
+                  </thead>
+                  <tbody id="settings-users-tbody">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
               </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-              <label class="form-label">Karta Egasining Ism-Sharifi (Cardholder Name)</label>
-              <input type="text" id="settings-click-card-holder" class="neo-input" placeholder="e.g. ABDURASUL A." style="text-transform: uppercase;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-              <div class="form-group">
-                <label class="form-label">Merchant ID (ixtiyoriy)</label>
-                <input type="text" id="settings-click-merchant-id" class="neo-input" placeholder="e.g. 12345">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Service ID (ixtiyoriy)</label>
-                <input type="text" id="settings-click-service-id" class="neo-input" placeholder="e.g. 67890">
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-              <button class="btn-primary" id="settings-save-click-btn" style="width: auto; padding: 12px 30px;"><i class="fas fa-save" style="margin-right: 8px;"></i>Saqlash</button>
             </div>
           </div>
 
-          <!-- Centralized User Accounts & Roles Management -->
-          <div class="glass-card admin-only" style="margin-top: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <h3 class="card-title text-accent"><i class="fas fa-users-cog" style="margin-right: 8px;"></i>Tizim Foydalanuvchilari va Rollar</h3>
-              <button class="btn-primary" id="open-add-user-modal" style="width: auto; padding: 6px 16px; font-size: 13px;">Yangi foydalanuvchi qo'shish</button>
-            </div>
-            
-            <div class="table-responsive">
-              <table class="neo-table">
-                <thead>
-                  <tr>
-                    <th>Foydalanuvchi</th>
-                    <th>Gmail (Login)</th>
-                    <th>Rol (Ruxsatlar)</th>
-                    <th>Filial (Joylashuv)</th>
-                    <th>Amallar</th>
-                  </tr>
-                </thead>
-                <tbody id="settings-users-tbody">
-                  <!-- Dynamically populated -->
-                </tbody>
-              </table>
+          <!-- Subtab 3: Click Payments -->
+          <div id="subtab-content-click" class="settings-subtab-content" style="display: none;">
+            <div class="glass-card">
+              <h3 class="card-title text-accent" style="margin-bottom: 20px;">
+                <i class="fas fa-credit-card" style="margin-right: 8px;"></i>Click.uz Avtomatik To'lov Sozlamalari
+              </h3>
+              
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label class="form-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: rgba(255,255,255,0.02); padding: 12px 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                  <span style="font-weight: 600; color: #ffffff;">Click orqali to'lovni faollashtirish (Active)</span>
+                  <input type="checkbox" id="settings-click-active" style="width: 20px; height: 20px; accent-color: #00f2fe; cursor: pointer;">
+                </label>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                  <label class="form-label">Karta Raqami / Hisob Raqam (Settlement Card Number)</label>
+                  <input type="text" id="settings-click-card-number" class="neo-input" placeholder="e.g. 8600 1234 5678 9012" maxlength="19">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Muddati (Expiry Date)</label>
+                  <input type="text" id="settings-click-card-expiry" class="neo-input" placeholder="e.g. 12/28" maxlength="5">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label class="form-label">Karta Egasining Ism-Sharifi (Cardholder Name)</label>
+                <input type="text" id="settings-click-card-holder" class="neo-input" placeholder="e.g. ABDURASUL A." style="text-transform: uppercase;">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                  <label class="form-label">Merchant ID (ixtiyoriy)</label>
+                  <input type="text" id="settings-click-merchant-id" class="neo-input" placeholder="e.g. 12345">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Service ID (ixtiyoriy)</label>
+                  <input type="text" id="settings-click-service-id" class="neo-input" placeholder="e.g. 67890">
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-primary" id="settings-save-click-btn" style="width: auto; padding: 12px 30px;"><i class="fas fa-save" style="margin-right: 8px;"></i>Saqlash</button>
+              </div>
             </div>
           </div>
         </section>
