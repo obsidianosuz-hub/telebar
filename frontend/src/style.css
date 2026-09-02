@@ -254,6 +254,15 @@ select.neo-input option {
   transition: var(--transition-smooth);
 }
 
+.pin-btn.pin-action {
+  border-radius: 16px;
+  font-size: 11px;
+  line-height: 1.3;
+  padding: 4px 6px;
+  text-align: center;
+  word-break: break-word;
+}
+
 .pin-btn:hover {
   transform: translateY(-2px);
   box-shadow: 4px 4px 15px #020408, -4px -4px 15px #253e6b;
@@ -263,6 +272,37 @@ select.neo-input option {
 .pin-btn:active {
   transform: translateY(1px);
   box-shadow: var(--neo-inset);
+}
+
+/* Quick 6-Digit Numpad Buttons */
+.quick-numpad-btn {
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.quick-numpad-btn:hover {
+  background: rgba(0, 242, 254, 0.14);
+  border-color: rgba(0, 242, 254, 0.4);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.25);
+}
+
+.quick-numpad-btn:active {
+  transform: translateY(1px) scale(0.95);
+  background: rgba(0, 242, 254, 0.25);
 }
 
 /* Primary Button (Neomorphic Glass) */
@@ -352,6 +392,19 @@ select.neo-input option {
   align-items: center;
   gap: 12px;
   box-shadow: var(--neo-inset);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.user-status-badge:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 242, 254, 0.3);
+}
+
+.user-status-badge.active-open {
+  border-color: var(--accent);
+  background: rgba(0, 242, 254, 0.05);
 }
 
 .status-dot {
@@ -788,6 +841,19 @@ select.neo-input option {
 .role-cashier .admin-only {
   display: none !important;
 }
+.role-admin .admin-only {
+  display: block !important;
+}
+.role-admin th.admin-only,
+.role-admin td.admin-only {
+  display: table-cell !important;
+}
+.role-admin button.admin-only {
+  display: inline-block !important;
+}
+.role-admin .app-sidebar .admin-only {
+  display: block !important;
+}
 
 /* ==========================================
    UI PRESET DESIGN SYSTEM OVERRIDES
@@ -1032,12 +1098,23 @@ body.preset-minimalist .neo-table td {
     flex-direction: column !important;
   }
 
+  /* Fixed Top Sidebar/Header on mobile */
   .app-sidebar {
     width: 100% !important;
-    height: auto !important;
-    padding: 16px !important;
+    height: 56px !important;
+    padding: 0 12px !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: var(--bg-primary) !important;
     border-right: none !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3) !important;
   }
 
   /* User Info card layout on mobile */
@@ -1045,70 +1122,121 @@ body.preset-minimalist .neo-table td {
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
-    gap: 16px !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  #btn-toggle-sidebar {
+    display: none !important; /* Not needed on mobile bottom navigation */
+  }
+
+  #mobile-logout-btn {
+    display: flex !important;
   }
 
   .user-status-badge {
     margin-top: 0 !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .user-info-text {
+    font-size: 11px !important;
+  }
+
+  .user-info-text span:last-child {
+    display: none !important; /* Hide role to save space */
   }
 
   #debug-banner {
     display: none !important; /* Hide debugger on mobile screens */
   }
 
-  /* Navigation stack horizontally with wrapping */
-  .app-nav {
+  /* Bottom Navigation Bar for Mobile */
+  .app-sidebar .app-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-    margin-top: 16px !important;
+    flex-wrap: nowrap !important;
+    background: rgba(18, 18, 28, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 1000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4) !important;
+    margin-top: 0 !important;
     width: 100% !important;
   }
 
-  .nav-link {
-    flex: 1 1 calc(50% - 6px) !important; /* Two links per row on mobile */
-    min-width: 120px !important;
-    padding: 8px 12px !important;
-    font-size: 12px !important;
+  .app-sidebar .nav-link {
+    flex: 1 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
     justify-content: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 6px 0 !important;
+    font-size: 9px !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
     text-align: center !important;
-    border-left: none !important;
-    border-bottom: 2px solid transparent !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
   }
 
-  .nav-link.active {
-    border-left: none !important;
-    border-bottom: 2px solid var(--accent) !important;
+  .app-sidebar .nav-link i {
+    font-size: 18px !important;
+    margin-right: 0 !important;
+    width: auto !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  .app-sidebar .nav-link span {
+    font-size: 9px !important;
+  }
+
+  .app-sidebar .nav-link.active {
+    color: var(--accent) !important;
+    background: none !important;
+    border-bottom: none !important;
+  }
+
+  .app-sidebar .nav-link.active i {
+    transform: translateY(-2px) scale(1.1);
   }
 
   /* Hide large information block on sidebar bottom */
   .sidebar-bottom {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    margin-top: 16px !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
-    padding-top: 16px !important;
-  }
-
-  .sidebar-bottom .btn-secondary {
-    width: 100% !important;
+    display: none !important;
   }
 
   /* Main content padding adjustments */
   .app-content {
-    padding: 16px !important;
+    margin-top: 56px !important;
+    padding: 12px 12px 76px 12px !important; /* Leave space for bottom nav */
   }
 
   /* Dashboard top metrics cards layout */
   .stats-grid {
-    grid-template-columns: 1fr 1fr !important; /* 2 columns on mobile instead of 1 stack */
-    gap: 12px !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
   }
 
   .stats-grid .glass-card:last-child {
-    grid-column: span 2 !important; /* Last card spans full width */
+    grid-column: span 2 !important;
   }
 
   /* Inline styled rows stack vertically */
@@ -1124,6 +1252,12 @@ body.preset-minimalist .neo-table td {
     width: 100% !important;
   }
 
+  /* Form Stack on Mobile */
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
   /* Table styling responsiveness */
   .table-responsive {
     border-radius: 12px !important;
@@ -1131,13 +1265,68 @@ body.preset-minimalist .neo-table td {
   }
 
   .neo-table th, .neo-table td {
-    padding: 10px 12px !important;
-    font-size: 11px !important;
+    padding: 8px 10px !important;
+    font-size: 10px !important;
+  }
+
+  /* POS Switcher and responsive layouts */
+  .mobile-pos-switcher {
+    display: flex !important;
+  }
+
+  /* When catalog tab is active on mobile */
+  .pos-grid.show-catalog > div:first-child {
+    display: block !important;
+  }
+  .pos-grid.show-catalog > .cart-card {
+    display: none !important;
+  }
+
+  /* When cart tab is active on mobile */
+  .pos-grid.show-cart > div:first-child {
+    display: none !important;
+  }
+  .pos-grid.show-cart > .cart-card {
+    display: block !important;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 8px !important;
+    max-height: calc(100vh - 190px) !important;
+    padding-right: 0 !important;
+  }
+
+  .product-card {
+    min-height: 180px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .product-img-wrapper {
+    height: 70px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .product-name {
+    font-size: 13px !important;
+  }
+
+  .product-specs {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+  }
+
+  .product-price {
+    font-size: 13px !important;
   }
 
   /* Checkout Cart sizing */
-  .glass-card[style*="width: 400px"] {
+  .glass-card[style*="width: 400px"],
+  .glass-card.cart-card {
     width: 100% !important;
+    padding: 16px !important;
+    margin-top: 0 !important;
   }
 
   /* Auth Card adjustments */
@@ -1145,14 +1334,23 @@ body.preset-minimalist .neo-table td {
     width: 95% !important;
     max-width: 400px !important;
     margin: 12px !important;
-    padding: 24px !important;
+    padding: 20px !important;
   }
 
   /* Modals */
   .modal-content {
     width: 95% !important;
     margin: 10px !important;
-    padding: 20px !important;
+    padding: 16px !important;
+  }
+
+  .modal-footer {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .modal-footer button {
+    width: 100% !important;
   }
 }
 

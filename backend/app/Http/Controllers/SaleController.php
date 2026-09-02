@@ -20,6 +20,15 @@ class SaleController extends Controller
             'cart' => 'required|array|min:1',
             'cart.*.product_id' => 'required|uuid|exists:products,id',
             'cart.*.quantity' => 'required|integer|min:1',
+            'payment_method' => 'sometimes|string|in:cash,click,debt',
+            'debt_details' => 'required_if:payment_method,debt|array',
+            'debt_details.customer_name' => 'required_if:payment_method,debt|string|max:255',
+            'debt_details.customer_phone' => 'required_if:payment_method,debt|string|max:50',
+            'debt_details.paid_amount' => 'nullable|numeric|min:0',
+            'debt_details.due_date' => 'nullable|date',
+            'debt_details.passport_series_number' => 'required_if:payment_method,debt|string|max:30',
+            'debt_details.passport_pinfl' => 'nullable|string|size:14',
+            'debt_details.customer_address' => 'required_if:payment_method,debt|string|max:1000',
         ]);
 
         if ($validator->fails()) {
@@ -40,6 +49,9 @@ class SaleController extends Controller
         // Perform transaction to ensure data integrity
         try {
             DB::transaction(function () use ($request, $activeShift, &$salesInvoice, &$grandTotal) {
+                $paymentMethod = $request->input('payment_method', 'cash');
+                $paymentStatus = $paymentMethod === 'debt' ? 'pending_debt' : 'paid';
+
                 foreach ($request->cart as $item) {
                     // Lock the row for update to prevent race conditions in stock check
                     $product = Product::lockForUpdate()->find($item['product_id']);
@@ -63,6 +75,8 @@ class SaleController extends Controller
                         'product_id' => $product->id,
                         'quantity' => $item['quantity'],
                         'total_price' => $itemTotal,
+                        'payment_method' => $paymentMethod,
+                        'payment_status' => $paymentStatus,
                         'timestamp' => now()
                     ]);
 
@@ -76,8 +90,32 @@ class SaleController extends Controller
                     ];
                 }
 
-                // Increment shift specific revenue ledger
-                $activeShift->generated_revenue += $grandTotal;
+                // If payment method is debt, create the Debt record
+                $actualRevenueGenerated = $grandTotal;
+                if ($paymentMethod === 'debt') {
+                    $debtDetails = $request->input('debt_details');
+                    $paidAmount = floatval($debtDetails['paid_amount'] ?? 0.00);
+                    $actualRevenueGenerated = 0.00; // Defer down payment revenue until Admin approval
+
+                    $debt = \App\Models\Debt::create([
+                        'sale_id' => $salesInvoice[0]['sale_id'], // Link to the first sale item
+                        'customer_name' => $debtDetails['customer_name'],
+                        'customer_phone' => $debtDetails['customer_phone'],
+                        'total_amount' => $grandTotal,
+                        'paid_amount' => $paidAmount,
+                        'due_date' => $debtDetails['due_date'] ?? null,
+                        'status' => 'pending_approval', // Sets status to pending_approval
+                        'passport_series_number' => $debtDetails['passport_series_number'] ?? null,
+                        'passport_pinfl' => $debtDetails['passport_pinfl'] ?? null,
+                        'customer_address' => $debtDetails['customer_address'] ?? null,
+                        'branch_id' => $request->user()->branch_id ?? null,
+                        'user_id' => $request->user()->id ?? null,
+                        'shift_id' => $activeShift->id ?? null,
+                    ]);
+                }
+
+                // Increment shift specific revenue ledger by actual payment received
+                $activeShift->generated_revenue += $actualRevenueGenerated;
                 $activeShift->save();
 
                 // Log activity
@@ -85,11 +123,16 @@ class SaleController extends Controller
                     return $i['product_name'] . ' x ' . $i['quantity'];
                 })->join(', ');
                 
+                $logDescription = "[Sotuv: {$itemNames}] Sotuv amalga oshirildi (Uslub: " . strtoupper($paymentMethod) . ", Jami: \$" . number_format($grandTotal, 2) . ")";
+                if ($paymentMethod === 'debt') {
+                    $logDescription .= " (Boshlang'ich to'lov: \$" . number_format($actualRevenueGenerated, 2) . ")";
+                }
+
                 \App\Models\ActivityLog::create([
                     'user_id' => $request->user()->id ?? null,
                     'user_name' => ($request->user()->name ?? 'Tizim') . ($request->user() ? ' (' . $request->user()->role . ')' : ''),
                     'action_type' => 'sale',
-                    'description' => "[Sotuv: {$itemNames}] Sotuv amalga oshirildi (Jami: \$" . number_format($grandTotal, 2) . ")",
+                    'description' => $logDescription,
                 ]);
             });
 
@@ -151,7 +194,7 @@ class SaleController extends Controller
      */
     public function history()
     {
-        $sales = Sale::with(['product.branch', 'shift.user.branch'])
+        $sales = Sale::with(['product.branch', 'shift.user.branch', 'debt'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($s) {
@@ -166,6 +209,9 @@ class SaleController extends Controller
                     'cashier' => $s->shift->user->name ?? 'Kassir',
                     'cashier_role' => $s->shift->user->role ?? 'cashier',
                     'branch_name' => $s->product->branch->name ?? ($s->shift->user->branch->name ?? 'Asosiy Ofis'),
+                    'payment_method' => $s->payment_method ?? 'cash',
+                    'payment_status' => $s->payment_status ?? 'paid',
+                    'debt_id' => $s->debt->id ?? null,
                     'time' => $s->timestamp ? $s->timestamp->toIso8601String() : $s->created_at->toIso8601String()
                 ];
             });

@@ -12,6 +12,9 @@
 
 # Build Artifacts
 **/dist/
+**/build/
+*.apk
+**/*.apk
 **/npm-debug.log*
 **/yarn-debug.log*
 **/yarn-error.log*
@@ -23,3 +26,9 @@ Thumbs.db
 # Laravel Database & Logs
 **/database/database.sqlite
 **/storage/logs/*.log
+**/storage/framework/views/*.php
+**/storage/framework/cache/data/*
+**/storage/framework/sessions/*
+job_log.txt
+jobs*.json
+runs*.json

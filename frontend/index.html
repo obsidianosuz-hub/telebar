@@ -18,14 +18,24 @@
     <!-- 1. AUTHENTICATION COMPONENT -->
     <div id="auth-screen" class="auth-wrapper">
       <div class="auth-card">
-        <div class="auth-header">
+        <div class="auth-header" style="position: relative;">
           <div class="auth-logo" data-i18n="brand">telebar</div>
           <h2 class="auth-title" id="auth-title-text" data-i18n="login_title">Telebar POS Terminali</h2>
           <div style="text-align: center; font-size: 11px; color: var(--accent); margin-top: 6px; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9;">TIZIM PORT: 5174 (YANGILANGAN)</div>
         </div>
         
-        <!-- Step 1: Email & Password -->
-        <form id="login-form">
+        <!-- Login Mode Switcher Tabs -->
+        <div class="auth-mode-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); padding: 4px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.08);">
+          <button type="button" id="tab-login-pin" class="auth-tab-btn active" style="flex: 1; padding: 9px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s; background: var(--accent-gradient); color: #030712;">
+            <i class="fas fa-key" style="margin-right: 6px;"></i>Tezkor PIN / Parol
+          </button>
+          <button type="button" id="tab-login-email" class="auth-tab-btn" style="flex: 1; padding: 9px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s; background: transparent; color: var(--color-text-secondary);">
+            <i class="fas fa-envelope" style="margin-right: 6px;"></i>Gmail va Parol
+          </button>
+        </div>
+
+        <!-- Step 1: Email & Password (Hidden by default) -->
+        <form id="login-form" style="display: none;">
           <div class="form-group">
             <label class="form-label" data-i18n="email_label">Gmail Manzili</label>
             <input type="email" id="login-email" class="neo-input" placeholder="misol@gmail.com" required>
@@ -35,6 +45,52 @@
             <input type="password" id="login-password" class="neo-input" placeholder="Parolni kiriting" required>
           </div>
           <button type="submit" class="btn-primary" data-i18n="btn_next">Davom Etish</button>
+        </form>
+
+        <!-- Step 1B: Quick 6-Digit PIN Login Form (Active by default) -->
+        <form id="quick-login-form">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <label class="form-label" style="margin: 0; font-weight: 600;">6 xonali shaxsiy PIN kod</label>
+              <button type="button" id="toggle-quick-pin-visibility" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px;" title="PIN kodni ko'rsatish/yashirish">
+                <i class="fas fa-eye" id="quick-pin-eye-icon"></i>
+                <span id="quick-pin-eye-text" style="font-size: 11px;">Ko'rsatish</span>
+              </button>
+            </div>
+            
+            <!-- 6 PIN Digit Input Boxes -->
+            <div class="pin-digit-boxes" style="display: flex; justify-content: center; gap: 8px; margin: 12px 0;">
+              <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box neo-input" data-index="0" style="width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; padding: 0; border: 1px solid rgba(255,255,255,0.12);" autofocus>
+              <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box neo-input" data-index="1" style="width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; padding: 0; border: 1px solid rgba(255,255,255,0.12);">
+              <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box neo-input" data-index="2" style="width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; padding: 0; border: 1px solid rgba(255,255,255,0.12);">
+              <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box neo-input" data-index="3" style="width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; padding: 0; border: 1px solid rgba(255,255,255,0.12);">
+              <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box neo-input" data-index="4" style="width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; padding: 0; border: 1px solid rgba(255,255,255,0.12);">
+              <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="pin-box neo-input" data-index="5" style="width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 700; border-radius: 12px; padding: 0; border: 1px solid rgba(255,255,255,0.12);">
+            </div>
+            
+            <input type="hidden" id="quick-pin-combined">
+
+            <div style="font-size: 11px; color: var(--color-text-secondary); text-align: center; margin-top: 4px; margin-bottom: 12px;">
+              Har bir kassirga biriktirilgan 6 xonali PIN kodni kiriting yoki quyidagi raqamlardan foydalaning.
+            </div>
+
+            <!-- On-Screen Touch / Click Numeric Keypad -->
+            <div class="quick-pin-numpad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px auto 16px auto; max-width: 270px;">
+              <button type="button" class="quick-numpad-btn" data-digit="1">1</button>
+              <button type="button" class="quick-numpad-btn" data-digit="2">2</button>
+              <button type="button" class="quick-numpad-btn" data-digit="3">3</button>
+              <button type="button" class="quick-numpad-btn" data-digit="4">4</button>
+              <button type="button" class="quick-numpad-btn" data-digit="5">5</button>
+              <button type="button" class="quick-numpad-btn" data-digit="6">6</button>
+              <button type="button" class="quick-numpad-btn" data-digit="7">7</button>
+              <button type="button" class="quick-numpad-btn" data-digit="8">8</button>
+              <button type="button" class="quick-numpad-btn" data-digit="9">9</button>
+              <button type="button" class="quick-numpad-btn quick-numpad-clear" data-action="clear" title="Tozalash" style="color: var(--color-danger); font-size: 16px; font-weight: 700;">C</button>
+              <button type="button" class="quick-numpad-btn" data-digit="0">0</button>
+              <button type="button" class="quick-numpad-btn quick-numpad-backspace" data-action="backspace" title="Bitta o'chirish" style="color: var(--accent); font-size: 17px;"><i class="fas fa-backspace"></i></button>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" id="btn-quick-login-submit">Tizimga Kirish</button>
         </form>
 
         <!-- Step 2: PIN Code Pad (For Cashiers) -->
@@ -57,9 +113,9 @@
               <button class="pin-btn num-key" data-value="7">7</button>
               <button class="pin-btn num-key" data-value="8">8</button>
               <button class="pin-btn num-key" data-value="9">9</button>
-              <button class="pin-btn" id="pin-clear" data-i18n="btn_back">Orqaga</button>
+              <button class="pin-btn pin-action" id="pin-clear" data-i18n="btn_back">Orqaga</button>
               <button class="pin-btn num-key" data-value="0">0</button>
-              <button class="pin-btn" id="pin-submit" data-i18n="btn_login">Kirish</button>
+              <button class="pin-btn pin-action" id="pin-submit" data-i18n="btn_login">Kirish</button>
             </div>
           </div>
         </div>
@@ -89,25 +145,13 @@
 
           <!-- Windows Button (Below them) -->
           <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; margin-bottom: 8px;">
-            <a href="./telebar.exe" download="telebar.exe" class="app-icon-btn windows-btn" title="Windows ilovasini (.EXE) yuklash" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 180px; padding: 8px 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(0, 120, 212, 0.12), rgba(0, 120, 212, 0.04)); border: 1px solid rgba(0, 120, 212, 0.3); color: #0078d4; font-size: 11px; font-weight: 600; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 12px rgba(0, 120, 212, 0.15), inset 0 1px 0 rgba(255,255,255,0.1);">
+            <a href="./telebar.zip" download="telebar.zip" class="app-icon-btn windows-btn" title="Windows ilovasini (.ZIP) yuklash" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 180px; padding: 8px 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(0, 120, 212, 0.12), rgba(0, 120, 212, 0.04)); border: 1px solid rgba(0, 120, 212, 0.3); color: #0078d4; font-size: 11px; font-weight: 600; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 12px rgba(0, 120, 212, 0.15), inset 0 1px 0 rgba(255,255,255,0.1);">
               <i class="fab fa-windows" style="font-size: 13px;"></i>
-              <span>Windows (.EXE) yuklash</span>
+              <span>Windows (.ZIP) yuklash</span>
             </a>
-          </div>
-
-          <div id="server-settings-panel" style="display: none; margin-top: 12px; text-align: left;">
-            <div class="form-group" style="margin-bottom: 10px;">
-              <label class="form-label" style="font-size: 11px;">Dasturning ishlash rejimi</label>
-              <select id="system-mode-select" class="neo-input" style="font-size: 12px; padding: 8px; width: 100%; background: var(--bg-secondary); border-color: rgba(255,255,255,0.1);">
-                <option value="offline">Telefonda mustaqil ishlash (Offline Baza)</option>
-                <option value="online">Kompyuter serveriga ulanish (Real-Time Tarmoq)</option>
-              </select>
+            <div style="font-size: 10px; color: var(--color-text-secondary); text-align: center; max-width: 220px; line-height: 1.3; margin-top: 4px;">
+              Arxivni ochib (unzip), telebar.exe faylini ishga tushiring.
             </div>
-            <div class="form-group" id="server-ip-group" style="display: none; margin-bottom: 8px;">
-              <label class="form-label" style="font-size: 11px;">Kompyuter IP manzili (Server IP)</label>
-              <input type="text" id="server-ip-input" class="neo-input" style="font-size: 12px; padding: 8px 12px;" placeholder="10.0.2.2">
-            </div>
-            <button type="button" id="save-server-ip-btn" class="btn-primary" style="font-size: 11px; padding: 6px 12px; width: auto;">Saqlash va yangilash</button>
           </div>
         </div>
       </div>
@@ -124,29 +168,57 @@
             </button>
           </div>
           
-          <!-- Live Session Debugger -->
-          <div id="debug-banner" style="font-size: 10px; color: var(--accent); background: rgba(0, 242, 254, 0.08); padding: 8px; border-radius: 8px; font-family: monospace; border: 1px solid rgba(0, 242, 254, 0.15);">
-            Token: <span id="debug-token">null</span>
+          <div class="user-status-badge-wrapper" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <div class="user-status-badge" id="btn-toggle-user-profile" title="Smena va ish vaqtini ochish/yopish" style="flex: 1; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                <span class="status-dot"></span>
+                <div class="user-info-text">
+                  <span id="header-user-name">Kassir</span>
+                  <span id="header-user-role" data-i18n="role_cashier">Kassir</span>
+                </div>
+              </div>
+              <i class="fas fa-chevron-down" id="user-badge-chevron" style="font-size: 11px; color: var(--color-text-secondary); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);"></i>
+            </div>
+            
+            <button type="button" id="mobile-logout-btn" class="neo-input" style="display: none; width: 32px; height: 32px; padding: 0; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); border-radius: 8px; cursor: pointer; color: var(--color-danger);" title="Chiqish">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
           </div>
 
-          <div class="user-status-badge">
-            <span class="status-dot"></span>
-            <div class="user-info-text">
-              <span id="header-user-name">Kassir</span>
-              <span id="header-user-role" data-i18n="role_cashier">Kassir</span>
+          <!-- Cashier Shift Live Status Widget (Hidden by default, opened on clicking user badge) -->
+          <div id="cashier-shift-widget" style="display: none; background: rgba(0, 242, 254, 0.04); border: 1px solid rgba(0, 242, 254, 0.16); border-radius: 14px; padding: 12px; margin-bottom: 16px; box-shadow: 0 6px 20px rgba(0,0,0,0.3); transition: all 0.3s ease;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 11px; font-weight: 600; color: #10b981; display: flex; align-items: center; gap: 5px;">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981; display: inline-block;"></span>
+                Online (Faol Smena)
+              </span>
+              <span id="shift-type-badge" style="font-size: 10px; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.06); color: var(--accent); font-weight: 600;">Kunduzgi</span>
             </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+              <span style="color: var(--color-text-secondary);"><i class="fas fa-stopwatch" style="margin-right: 4px;"></i>Ish Vaqti:</span>
+              <span id="live-shift-timer" style="font-family: monospace; font-size: 13px; font-weight: 700; color: #fff;">00:00:00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: 4px;">
+              <span style="color: var(--color-text-secondary);"><i class="fas fa-cash-register" style="margin-right: 4px;"></i>Kassa Savdo:</span>
+              <span id="live-shift-revenue" style="font-weight: 700; color: var(--accent);">$0.00</span>
+            </div>
+            <button type="button" id="btn-end-shift-action" style="margin-top: 10px; width: 100%; padding: 8px 10px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 8px; color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+              <i class="fas fa-power-off"></i> Ishni Tugatish (Chiqish)
+            </button>
           </div>
         </div>
 
         <nav class="app-nav">
-          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" style="display: none;" draggable="true"><i class="fas fa-chart-line" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_dashboard">Boshqaruv Paneli</span></a>
+          <a class="nav-link active admin-only" data-view="dashboard" id="nav-dash" draggable="true"><i class="fas fa-chart-line" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_dashboard">Boshqaruv Paneli</span></a>
           <a class="nav-link" data-view="pos" id="nav-pos-tab" draggable="true"><i class="fas fa-cash-register" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_pos">Sotuv (POS)</span></a>
           <a class="nav-link" data-view="warehouse" id="nav-wh" draggable="true"><i class="fas fa-boxes" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_warehouse">Omborxona</span></a>
-          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" style="display: none;" draggable="true"><i class="fas fa-users" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_staff">Xodimlar</span></a>
-          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" style="display: none;" draggable="true"><i class="fas fa-store" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_branches">Ob'yektlar</span></a>
-          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" style="display: none;" draggable="true"><i class="fas fa-credit-card" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_click">Click Integratsiya</span></a>
-          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" style="display: none;" draggable="true"><i class="fas fa-history" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_activities">Oxirgi Amallar</span></a>
-          <a class="nav-link admin-only" data-view="settings" id="nav-set" style="display: none;" draggable="true"><i class="fas fa-cogs" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_settings">Sozlamalar</span></a>
+          <a class="nav-link" data-view="debts" id="nav-debts-tab" draggable="true"><i class="fas fa-hand-holding-usd" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_debts">Nasiya / Qarzlar</span></a>
+          <a class="nav-link" data-view="installments" id="nav-installments-tab" draggable="true"><i class="fas fa-calendar-check" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_installments">Oylik To'lovlar</span></a>
+          <a class="nav-link admin-only" data-view="staff" id="nav-staff-tab" draggable="true"><i class="fas fa-users" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_staff">Xodimlar</span></a>
+          <a class="nav-link admin-only" data-view="branches" id="nav-branches-tab" draggable="true"><i class="fas fa-store" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_branches">Ob'yektlar</span></a>
+          <a class="nav-link admin-only" data-view="click-integration" id="nav-click-tab" draggable="true"><i class="fas fa-credit-card" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_click">Click Integratsiya</span></a>
+          <a class="nav-link admin-only" data-view="activities" id="nav-activities-tab" draggable="true"><i class="fas fa-history" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_activities">Oxirgi Amallar</span></a>
+          <a class="nav-link admin-only" data-view="settings" id="nav-set" draggable="true"><i class="fas fa-cogs" style="margin-right: 8px; width: 16px; text-align: center;"></i><span data-i18n="nav_settings">Sozlamalar</span></a>
         </nav>
 
         <div class="sidebar-bottom">
@@ -324,12 +396,14 @@
                     <th data-i18n="wh_col_qty">Soni</th>
                     <th data-i18n="pos_total">Summa</th>
                     <th>Sotuvchi (Skaner)</th>
+                    <th>To'lov turi</th>
                     <th data-i18n="wh_col_actions">Vaqt</th>
+                    <th>Amallar</th>
                   </tr>
                 </thead>
                 <tbody id="sales-history-tbody">
                   <tr>
-                    <td colspan="7" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td>
+                    <td colspan="9" style="text-align: center; color: var(--color-text-secondary);" data-i18n="dash_no_sales">Hozircha sotuvlar amalga oshirilmagan</td>
                   </tr>
                 </tbody>
               </table>
@@ -339,14 +413,39 @@
 
         <!-- 2B. POINT-OF-SALE (POS) TAB VIEW -->
         <section id="view-pos" class="tab-view" style="display: none;">
-          <div class="pos-grid">
+          <!-- Mobile POS Switcher Tabs -->
+          <div class="mobile-pos-switcher" style="display: none; margin-bottom: 12px; gap: 10px;">
+            <button type="button" class="btn-primary" id="pos-tab-catalog" style="flex: 1; padding: 10px 14px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fas fa-cash-register"></i>Savdo</button>
+            <button type="button" class="btn-secondary" id="pos-tab-cart" style="flex: 1; padding: 10px 14px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fas fa-shopping-cart"></i>Savat <span class="cart-badge" id="mobile-cart-badge" style="background: var(--accent); color: var(--bg-primary); border-radius: 50%; padding: 2px 6px; font-size: 11px; display: none;">0</span></button>
+          </div>
+
+          <div class="pos-grid show-catalog">
             <div>
-              <div class="search-bar-container">
-                <input type="text" id="pos-search" class="neo-input" data-i18n="pos_search_placeholder" placeholder="Model yoki shtrixkod bo'yicha qidiruv...">
+              <!-- POS Mode Switcher Sub-Tabs -->
+              <div class="pos-mode-switcher" style="display: flex; gap: 8px; margin-bottom: 16px; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); max-width: 480px;">
+                <button type="button" class="btn-primary" id="pos-mode-scanner-btn" style="flex: 1; padding: 8px 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fas fa-barcode"></i>Skanerlash orqali</button>
+                <button type="button" class="btn-secondary" id="pos-mode-catalog-btn" style="flex: 1; padding: 8px 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fas fa-th-large"></i>Katalog orqali (Qo'lda)</button>
               </div>
-              <h3 class="card-title" style="margin-bottom: 16px;" data-i18n="pos_catalog">Smartfonlar Katalogi</h3>
-              <div class="product-grid" id="pos-product-list">
-                <!-- Dynamically loaded -->
+
+              <!-- Content A: Catalog Container -->
+              <div id="pos-catalog-container" style="display: none;">
+                <div class="search-bar-container">
+                  <input type="text" id="pos-search" class="neo-input" data-i18n="pos_search_placeholder" placeholder="Model yoki shtrixkod bo'yicha qidiruv...">
+                </div>
+                <h3 class="card-title" style="margin-bottom: 16px;" data-i18n="pos_catalog">Smartfonlar Katalogi</h3>
+                <div class="product-grid" id="pos-product-list">
+                  <!-- Dynamically loaded -->
+                </div>
+              </div>
+
+              <!-- Content B: Scanner Container (Active initially) -->
+              <div id="pos-scanner-container" style="display: block; position: relative;">
+                <!-- Completely invisible input field for hardware scanner -->
+                <input type="text" id="pos-hardware-scanner-input" style="position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; left: -9999px; top: 0;" autocomplete="off">
+
+                <!-- Live Scanned Product Display Area -->
+                <div class="glass-card" id="pos-scanner-product-display" style="display: none; padding: 24px; text-align: center; min-height: 220px; border-color: rgba(255,255,255,0.06); position: relative; overflow: hidden;">
+                </div>
               </div>
             </div>
 
@@ -354,14 +453,7 @@
             <div class="glass-card cart-card">
               <h3 class="card-title" data-i18n="pos_cart">Sotuv Savatchasi</h3>
               
-              <!-- Simulating peripheral hardware scanning -->
-              <div class="glass-card" style="padding: 12px; margin-top: 8px; border-color: rgba(0, 242, 254, 0.2);">
-                <div style="font-size: 12px; margin-bottom: 6px; font-weight: 600;" data-i18n="pos_scan_title">QR Skanerni Simulyatsiya Qilish</div>
-                <div style="display: flex; gap: 8px;">
-                  <input type="text" id="simulated-qr-input" class="neo-input" style="padding: 6px 12px; font-size: 13px;" placeholder="TEL-XXXXX">
-                  <button class="btn-primary" id="sim-scan-btn" style="width: auto; padding: 6px 12px; font-size: 13px;" data-i18n="pos_btn_scan">Skanerlash</button>
-                </div>
-              </div>
+
 
               <!-- Manual Sale Selection -->
               <div class="glass-card" style="padding: 12px; margin-top: 8px; border-color: rgba(16, 185, 129, 0.2);">
@@ -447,27 +539,263 @@
           </div>
         </section>
 
-        <!-- 2D. STAFF MANAGEMENT VIEW -->
-        <section id="view-staff" class="tab-view" style="display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2 class="card-title" style="font-size: 18px;" data-i18n="staff_title">Xodimlar Ro'yxati</h2>
-            <button class="btn-primary" id="open-add-staff-modal" style="width: auto; padding: 10px 20px;" data-i18n="staff_btn_add">Yangi Kassir Qo'shish</button>
+        <!-- 2C_2. DEBTS MANAGEMENT VIEW -->
+        <section id="view-debts" class="tab-view" style="display: none;">
+          <!-- Summary Cards -->
+          <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-icon" style="color: var(--accent);"><i class="fas fa-hand-holding-usd"></i></div>
+              <div class="stat-value" id="debt-summary-total">$0.00</div>
+              <div class="stat-label">Jami Berilgan Nasiyalar</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="color: var(--color-success);"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-value" id="debt-summary-repaid">$0.00</div>
+              <div class="stat-label">To'langan Summa</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="color: var(--color-danger);"><i class="fas fa-exclamation-circle"></i></div>
+              <div class="stat-value" id="debt-summary-remaining">$0.00</div>
+              <div class="stat-label">Kutilayotgan Qoldiq qarz</div>
+            </div>
           </div>
-          <div class="table-responsive">
+
+          <!-- Filters -->
+          <div class="glass-card" style="margin-bottom: 20px; padding: 15px;">
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 200px;">
+                <input type="text" id="debt-search" class="neo-input" placeholder="Mijoz ismi yoki telefon raqami..." style="padding: 10px 15px; font-size: 14px;">
+              </div>
+              <div style="width: 200px;">
+                <select id="debt-status-filter" class="neo-input" style="background: var(--bg-secondary); padding: 10px; font-size: 14px;">
+                  <option value="all">Barcha Qarzlar</option>
+                  <option value="pending_approval">Tasdiqlash kutilmoqda</option>
+                  <option value="pending" selected>Faol qarzlar (To'lanmagan)</option>
+                  <option value="paid">Yopilgan qarzlar (To'langan)</option>
+                  <option value="overdue">Muddati o'tgan to'lovlar</option>
+                  <option value="rejected">Rad etilganlar</option>
+                </select>
+              </div>
+              <div style="margin-left: auto;">
+                <button type="button" class="btn-primary" id="open-add-debt-modal-btn" style="width: auto; white-space: nowrap; padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; border: none; font-weight: 700; border-radius: 20px;"><i class="fas fa-user-plus" style="margin-right: 6px;"></i>Yangi Qarz Qo'shish</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Debts List Table -->
+          <div class="glass-card">
             <table class="neo-table">
               <thead>
                 <tr>
-                  <th data-i18n="staff_col_name">Foydalanuvchi</th>
-                  <th data-i18n="staff_col_email">Gmail Manzili</th>
-                  <th data-i18n="staff_col_wage">Ish Haqi (Soatiga)</th>
-                  <th data-i18n="staff_col_shift_status">Smena Holati va Daromad</th>
-                  <th data-i18n="wh_col_actions">Amallar</th>
+                  <th>Qarzdor Mijoz</th>
+                  <th>Smartfon</th>
+                  <th>Jami Summa</th>
+                  <th>To'langan</th>
+                  <th>Qoldiq Qarz</th>
+                  <th>To'lov Muddati</th>
+                  <th>Status</th>
+                  <th>Amallar</th>
                 </tr>
               </thead>
-              <tbody id="staff-table-body">
+              <tbody id="debts-table-body">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <!-- 2C_sub. MONTHLY INSTALLMENTS SCHEDULE VIEW -->
+        <section id="view-installments" class="tab-view" style="display: none;">
+          <!-- Summary Cards -->
+          <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card">
+              <div class="stat-icon" style="color: var(--accent);"><i class="fas fa-calendar-alt"></i></div>
+              <div class="stat-value" id="installments-summary-total">0</div>
+              <div class="stat-label">Jami Oylik To'lovlar (Soni)</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="color: var(--color-danger);"><i class="fas fa-exclamation-triangle"></i></div>
+              <div class="stat-value" id="installments-summary-overdue">0</div>
+              <div class="stat-label">Muddati O'tgan Oylik To'lovlar</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="color: var(--color-success);"><i class="fas fa-hourglass-half"></i></div>
+              <div class="stat-value" id="installments-summary-upcoming">0</div>
+              <div class="stat-label">Kutilayotgan Oylik To'lovlar</div>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="glass-card" style="margin-bottom: 20px; padding: 15px;">
+            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 200px;">
+                <input type="text" id="installment-search" class="neo-input" placeholder="Mijoz ismi yoki telefon raqami..." style="padding: 10px 15px; font-size: 14px;">
+              </div>
+              <div style="width: 230px;">
+                <select id="installment-status-filter" class="neo-input" style="background: var(--bg-secondary); padding: 10px; font-size: 14px;">
+                  <option value="all">Barcha Oylik To'lovlar</option>
+                  <option value="overdue" selected>Faqat Muddati O'tganlar</option>
+                  <option value="upcoming">Faqat Kutilayotganlar</option>
+                  <option value="paid">Faqat To'langanlar</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Installment List Table -->
+          <div class="glass-card">
+            <div class="table-responsive">
+              <table class="neo-table">
+                <thead>
+                  <tr>
+                    <th>Qarzdor Mijoz</th>
+                    <th>Smartfon / Nasiya</th>
+                    <th>To'lov oyi</th>
+                    <th>To'lov muddati</th>
+                    <th>Oylik summa</th>
+                    <th>To'langan summa</th>
+                    <th>Qoldiq</th>
+                    <th>Status</th>
+                    <th>Amallar</th>
+                  </tr>
+                </thead>
+                <tbody id="installments-table-body">
+                  <!-- Dynamically populated -->
+                  <tr>
+                    <td colspan="9" style="text-align: center; color: var(--color-text-secondary);">Oylik to'lovlar ro'yxati yuklanmoqda...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2D. STAFF MANAGEMENT & WORK HOURS VIEW -->
+        <section id="view-staff" class="tab-view" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2 class="card-title" style="font-size: 20px; margin-bottom: 4px;" data-i18n="staff_title">Xodimlar va Ish Vaqti Boshqaruvi</h2>
+              <div style="font-size: 12px; color: var(--color-text-secondary);">Kassirlar ro'yxati, jonli ish smenalari va kunlik savdo monitoringi</div>
+            </div>
+            <button class="btn-primary" id="open-add-staff-modal" style="width: auto; padding: 10px 20px;" data-i18n="staff_btn_add">
+              <i class="fas fa-user-plus" style="margin-right: 6px;"></i>Yangi Kassir Qo'shish
+            </button>
+          </div>
+
+          <!-- Staff View Subtabs Navigation -->
+          <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <button type="button" id="subtab-btn-staff-list" class="auth-tab-btn active" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; background: var(--accent-gradient); color: #030712;">
+              <i class="fas fa-users" style="margin-right: 6px;"></i>Xodimlar Ro'yxati
+            </button>
+            <button type="button" id="subtab-btn-staff-shifts" class="auth-tab-btn" style="padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.04); color: var(--color-text-secondary);">
+              <i class="fas fa-stopwatch" style="margin-right: 6px;"></i>Jonli Ish Vaqti va Smenalar
+            </button>
+          </div>
+
+          <!-- Subtab 1: Staff Directory & Branches List -->
+          <div id="subtab-content-staff-list">
+            <!-- Branch selection cards (side-by-side) -->
+            <div id="staff-branch-filters" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+              <!-- Dynamically loaded -->
+            </div>
+
+            <div class="table-responsive">
+              <table class="neo-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="staff_col_name">Foydalanuvchi</th>
+                    <th data-i18n="staff_col_email">Gmail Manzili</th>
+                    <th data-i18n="staff_col_wage">Ish Haqi (Soatiga)</th>
+                    <th data-i18n="staff_col_shift_status">Smena Holati va Daromad</th>
+                    <th data-i18n="wh_col_actions">Amallar</th>
+                  </tr>
+                </thead>
+                <tbody id="staff-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Subtab 2: Live Work Hours & Shifts Tracker -->
+          <div id="subtab-content-staff-shifts" style="display: none;">
+            <!-- Live Metrics Grid -->
+            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div class="glass-card stat-card" style="padding: 16px;">
+                <div class="stat-label"><i class="fas fa-user-clock" style="margin-right: 6px; color: #10b981;"></i>Online Kassirlar</div>
+                <div class="stat-value" id="stat-live-cashiers-count" style="color: #10b981;">0</div>
+                <div class="stat-desc">Ayni vaqtda faol ishlayotganlar</div>
+              </div>
+              <div class="glass-card stat-card" style="padding: 16px;">
+                <div class="stat-label"><i class="fas fa-cash-register" style="margin-right: 6px; color: var(--accent);"></i>Bugungi Kassa Tushumi</div>
+                <div class="stat-value" id="stat-live-shifts-revenue" style="color: var(--accent);">$0.00</div>
+                <div class="stat-desc">Kassirlar bajargan savdolar</div>
+              </div>
+              <div class="glass-card stat-card" style="padding: 16px;">
+                <div class="stat-label"><i class="fas fa-business-time" style="margin-right: 6px; color: #f59e0b;"></i>Bugun Ishlangan Vaqt</div>
+                <div class="stat-value" id="stat-live-shifts-hours" style="color: #f59e0b;">0 soat</div>
+                <div class="stat-desc">Barcha kassirlar jami vaqti</div>
+              </div>
+            </div>
+
+            <!-- 1. Live Active Sessions -->
+            <div class="glass-card" style="padding: 20px; margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 class="card-title" style="font-size: 16px; margin: 0; color: #10b981;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; display: inline-block; margin-right: 8px;"></span>
+                  Ayni Vaqtda Faol Ishlayotgan Kassirlar (Jonli Monitoring)
+                </h3>
+                <button class="btn-secondary" id="btn-refresh-shifts" style="width: auto; padding: 4px 12px; font-size: 12px;">
+                  <i class="fas fa-sync-alt" style="margin-right: 4px;"></i>Yangilash
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="neo-table">
+                  <thead>
+                    <tr>
+                      <th>Kassir</th>
+                      <th>Filial</th>
+                      <th>Holati</th>
+                      <th>Boshlangan Vaqt</th>
+                      <th>Jonli Ish Vaqti</th>
+                      <th>Shu Smenadagi Savdo</th>
+                      <th>Savdolar Soni</th>
+                    </tr>
+                  </thead>
+                  <tbody id="live-active-shifts-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 2. Shift History Archive -->
+            <div class="glass-card" style="padding: 20px;">
+              <h3 class="card-title" style="font-size: 16px; margin-bottom: 16px;">
+                <i class="fas fa-history" style="margin-right: 8px; color: var(--accent);"></i>
+                Smenalar va Ish Vaqtlari Tarixi (Arxiv)
+              </h3>
+              <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="neo-table">
+                  <thead>
+                    <tr>
+                      <th>Sana</th>
+                      <th>Kassir</th>
+                      <th>Filial</th>
+                      <th>Boshlandi</th>
+                      <th>Tugadi</th>
+                      <th>Davomiyligi</th>
+                      <th>Jami Savdo</th>
+                      <th>Hisoblangan Maosh</th>
+                      <th>Holat</th>
+                    </tr>
+                  </thead>
+                  <tbody id="shift-history-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -577,7 +905,12 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Secret Key / API Key</label>
-                <input type="password" id="click-secret-key" class="neo-input" placeholder="••••••••••••••••">
+                <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                  <input type="password" id="click-secret-key" class="neo-input" placeholder="••••••••••••••••" style="padding-right: 40px; width: 100%;">
+                  <span id="toggle-click-secret-key-btn" style="position: absolute; right: 12px; cursor: pointer; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; height: 100%; font-size: 14px; user-select: none;">
+                    <i class="far fa-eye"></i>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1000,13 +1333,16 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" data-i18n="field_staff_pass">Parol</label>
-                <input type="password" id="staff-password" class="neo-input" placeholder="Kamida 6 belgi">
+                <label class="form-label" data-i18n="field_staff_pass">Tizim Paroli</label>
+                <input type="password" id="staff-password" class="neo-input" placeholder="Parol (kamida 4 ta belgi)">
               </div>
               <div class="form-group">
-                <label class="form-label" data-i18n="field_staff_pin">PIN Kod (4 xonali)</label>
-                <input type="text" id="staff-pin" class="neo-input" maxlength="4" placeholder="1234">
+                <label class="form-label" data-i18n="field_staff_pin">Shaxsiy PIN Kod (6 xonali)</label>
+                <input type="text" id="staff-pin" class="neo-input" maxlength="6" placeholder="123456">
               </div>
+            </div>
+            <div style="font-size: 11px; color: var(--accent); margin-top: -6px; margin-bottom: 12px; line-height: 1.4;">
+              <i class="fas fa-shield-alt" style="margin-right: 4px;"></i>Xodim ushbu 6 xonali PIN-kod yoki Parol orqali to'g'ridan-to'g'ri tizimga tezkor kira oladi.
             </div>
             <div class="form-group">
               <label class="form-label" data-i18n="field_staff_wage">Ish Haqi stavkasi ($/soat)</label>
@@ -1050,6 +1386,35 @@
         </div>
       </div>
     </div>
+    <!-- Shift End Confirmation & Summary Modal -->
+    <div id="shift-summary-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 440px; text-align: center;">
+        <div style="font-size: 38px; margin-bottom: 8px;">🛑</div>
+        <h3 style="margin-bottom: 6px;">Navbatchilikni Yakunlash</h3>
+        <p style="color: var(--color-text-secondary); font-size: 13px; margin-bottom: 18px;">
+          Smenangiz to'xtatiladi va bugungi ish natijalaringiz admin tizimiga saqlanadi.
+        </p>
+        <div class="glass-card" style="padding: 16px; margin-bottom: 20px; text-align: left; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--color-text-secondary);">Kassir:</span>
+            <strong id="modal-shift-cashier" style="color: #fff;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--color-text-secondary);">Ishlangan Vaqt:</span>
+            <strong id="modal-shift-duration" style="color: var(--accent); font-family: monospace;">00:00:00</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--color-text-secondary);">Qilingan Jami Savdo:</span>
+            <strong id="modal-shift-sales" style="color: #10b981; font-size: 15px;">$0.00</strong>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-secondary" id="btn-cancel-end-shift" style="flex: 1;">Bekor qilish</button>
+          <button type="button" class="btn-primary" id="btn-confirm-end-shift" style="flex: 1; background: linear-gradient(135deg, #ef4444, #dc2626); border-color: #ef4444; color: #fff;">Tasdiqlash va Chiqish</button>
+        </div>
+      </div>
+    </div>
+
     <!-- User Account Add/Edit Modal -->
     <div id="user-modal" class="modal-overlay" style="display: none;">
       <div class="modal-content">
@@ -1073,8 +1438,8 @@
                 <input type="password" id="user-modal-password" class="neo-input" placeholder="Kamida 6 ta belgi">
               </div>
               <div class="form-group" id="user-modal-pin-group">
-                <label class="form-label">PIN Kod (Kassir uchun)</label>
-                <input type="text" id="user-modal-pin" class="neo-input" maxlength="4" placeholder="1234">
+                <label class="form-label">PIN Kod (6 xonali)</label>
+                <input type="text" id="user-modal-pin" class="neo-input" maxlength="6" placeholder="123456">
               </div>
             </div>
             <div class="form-row" style="margin-top: 12px;">
@@ -1142,7 +1507,7 @@
           Sotuv summasi: <strong id="pay-select-amount" style="color: var(--accent); font-size: 18px;">$0.00</strong>
         </p>
         
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
           <!-- Cash Payment Option -->
           <button id="pay-cash-btn" class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border: none;">
             <i class="fas fa-money-bill-wave" style="font-size: 18px;"></i>
@@ -1154,10 +1519,250 @@
             <i class="fas fa-qrcode" style="font-size: 18px;"></i>
             <span>Click QR-kod orqali to'lov</span>
           </button>
+
+          <!-- Nasiya Payment Option -->
+          <button id="pay-debt-btn" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border: none;">
+            <i class="fas fa-hand-holding-usd" style="font-size: 18px;"></i>
+            <span>Nasiya (Qarz) orqali sotish</span>
+          </button>
+        </div>
+
+        <!-- Debt Checkout Form (Hidden by default) -->
+        <div id="debt-checkout-form-container" style="display: none; text-align: left; margin-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+          <h4 style="font-size: 14px; font-weight: 600; color: #f59e0b; margin-bottom: 12px;"><i class="fas fa-user-tag" style="margin-right: 6px;"></i>Qarzdor Ma'lumotlari</h4>
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Qarzdor ismi</label>
+            <input type="text" id="debt-checkout-name" class="neo-input" placeholder="Ism va familiya" style="padding: 8px 12px; font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Telefon raqami</label>
+            <input type="text" id="debt-checkout-phone" class="neo-input" placeholder="+998901234567" style="padding: 8px 12px; font-size: 13px;">
+          </div>
+          <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Pasport seriyasi va raqami</label>
+              <input type="text" id="debt-checkout-passport" class="neo-input" placeholder="AA1234567" style="padding: 8px 12px; font-size: 13px; text-transform: uppercase;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">JShShIR (PINFL - 14 ta raqam)</label>
+              <input type="text" id="debt-checkout-pinfl" class="neo-input" placeholder="14 xonali raqam" maxlength="14" style="padding: 8px 12px; font-size: 13px;">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Yashash manzili (Yuridik hujjat uchun)</label>
+            <input type="text" id="debt-checkout-address" class="neo-input" placeholder="Toshkent sh., Yunusobod tumani, ..." style="padding: 8px 12px; font-size: 13px;">
+          </div>
+          <div class="form-row" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Boshlang'ich to'lov ($)</label>
+              <input type="number" id="debt-checkout-paid" class="neo-input" min="0" value="0" style="padding: 8px 12px; font-size: 13px;">
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">To'lash muddati</label>
+              <input type="date" id="debt-checkout-due" class="neo-input" style="padding: 8px 12px; font-size: 13px; color: #ffffff; background: rgba(0, 0, 0, 0.2);">
+            </div>
+          </div>
+          <button id="confirm-debt-checkout-btn" class="btn-primary" style="background: #f59e0b; color: #ffffff; width: 100%; padding: 12px; border: none; font-weight: 600;">
+            Nasiyani Tasdiqlash
+          </button>
         </div>
         
-        <div>
+        <div style="margin-top: 15px;">
           <button class="btn-secondary" id="close-pay-select-modal" style="width: auto; padding: 8px 25px;">Bekor qilish</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Manual Debt Modal -->
+    <div id="add-debt-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 600px; padding: 25px; border-radius: 16px; background: var(--bg-primary); border: 1px solid rgba(255,255,255,0.08); max-height: 90vh; overflow-y: auto; box-sizing: border-box;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 15px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #ffffff;"><i class="fas fa-user-plus" style="color: #00f2fe; margin-right: 8px;"></i>Yangi Nasiya Qarz Qo'shish</h3>
+          <span style="font-size: 20px; cursor: pointer; color: var(--color-text-secondary);" id="close-add-debt-modal-x">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="add-debt-form">
+            <h4 style="font-size: 12px; font-weight: 600; color: #00f2fe; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px;">Mijoz (Qarzdor) Ma'lumotlari</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Mijoz ismi va familiyasi</label>
+                <input type="text" id="add-debt-name" class="neo-input" placeholder="F.I.Sh." required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Telefon raqami</label>
+                <input type="text" id="add-debt-phone" class="neo-input" placeholder="+998901234567" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Pasport seriyasi va raqami</label>
+                <input type="text" id="add-debt-passport" class="neo-input" placeholder="AA1234567" style="text-transform: uppercase;" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">JShShIR (PINFL - 14 ta raqam)</label>
+                <input type="text" id="add-debt-pinfl" class="neo-input" placeholder="14 xonali raqam" maxlength="14">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+              <label class="form-label" style="font-size: 11px;">Yashash manzili (Yuridik shartnoma uchun)</label>
+              <input type="text" id="add-debt-address" class="neo-input" placeholder="Toshkent sh., Chilonzor tumani, ..." required>
+            </div>
+
+            <h4 style="font-size: 12px; font-weight: 600; color: #00f2fe; margin: 15px 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px;">Qurilma (Sotilayotgan buyum) va To'lov Shartlari</h4>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Nima olyapti? (Smartfon modeli)</label>
+                <input type="text" id="add-debt-product" class="neo-input" placeholder="Masalan: Redmi Note 13 Pro" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Soni</label>
+                <input type="number" id="add-debt-qty" class="neo-input" value="1" min="1" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Umumiy to'lov (Jami narxi - $)</label>
+                <input type="number" id="add-debt-total" class="neo-input" step="0.01" min="0" placeholder="0.00" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Boshlang'ich to'lov ($)</label>
+                <input type="number" id="add-debt-paid" class="neo-input" step="0.01" min="0" value="0" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Muddat (oylar soni)</label>
+                <input type="number" id="add-debt-months" class="neo-input" min="1" value="1" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size: 11px;">Oylik to'lov summasi ($)</label>
+                <input type="number" id="add-debt-monthly-pay" class="neo-input" step="0.01" min="0" placeholder="0.00" required>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label class="form-label" style="font-size: 11px;">Qarz to'lash muddati (oxirgi sana)</label>
+              <input type="date" id="add-debt-due" class="neo-input" style="color: #ffffff; background: rgba(0, 0, 0, 0.2);" required>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
+              <button type="button" class="btn-secondary" id="close-add-debt-modal-btn" style="width: auto; padding: 10px 20px;">Bekor qilish</button>
+              <button type="submit" class="btn-primary" style="width: auto; padding: 10px 25px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: 700; border: none; border-radius: 20px;">Nasiyani Saqlash</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Document / PDF Modal -->
+    <div id="view-document-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 800px; padding: 25px; border-radius: 16px; background: var(--bg-primary); border: 1px solid rgba(255,255,255,0.08); max-height: 95vh; display: flex; flex-direction: column; box-sizing: border-box;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 15px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #ffffff;"><i class="fas fa-file-invoice" style="color: #00f2fe; margin-right: 8px;"></i>Nasiya Shartnomasi Hujjati</h3>
+          <span style="font-size: 20px; cursor: pointer; color: var(--color-text-secondary);" id="close-document-modal-x">&times;</span>
+        </div>
+        <div class="modal-body" style="flex: 1; overflow-y: auto; background: #ffffff; color: #000000; padding: 30px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box;" id="document-preview-container">
+          <!-- Rendered A4 Document Page will go here -->
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px; margin-top: 15px;">
+          <button type="button" class="btn-secondary" id="close-document-modal-btn" style="width: auto; padding: 10px 20px;">Yopish</button>
+          <button type="button" class="btn-primary" id="download-document-pdf-btn" style="width: auto; padding: 10px 25px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: 700; border: none; border-radius: 20px;"><i class="fas fa-file-pdf" style="margin-right: 6px;"></i>Yuklab olish (PDF)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repayment Modal -->
+    <div id="repay-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 600px; padding: 25px; border-radius: 16px; max-height: 95vh; overflow-y: auto; box-sizing: border-box;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 15px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #ffffff;"><i class="fas fa-hand-holding-usd" style="color: #f59e0b; margin-right: 8px;"></i>Qarz To'lovini Qabul Qilish</h3>
+          <span style="font-size: 20px; cursor: pointer; color: var(--color-text-secondary);" id="close-repay-modal-x">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div style="background: rgba(245, 158, 11, 0.05); border: 1px dashed rgba(245, 158, 11, 0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>Mijoz:</span>
+              <strong id="repay-customer-name" style="color: #ffffff;">-</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>Telefon:</span>
+              <strong id="repay-customer-phone" style="color: #ffffff;">-</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+              <span>Jami qarz:</span>
+              <strong id="repay-total-amount" style="color: #ffffff;">$0.00</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+              <span>Qoldiq qarz:</span>
+              <strong id="repay-remaining-amount" style="color: #f59e0b; font-size: 14px;">$0.00</strong>
+            </div>
+          </div>
+
+          <form id="repay-form">
+            <input type="hidden" id="repay-debt-id">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label class="form-label">To'lov summasi ($)</label>
+              <input type="number" id="repay-amount-input" class="neo-input" step="0.01" min="0.01" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+              <label class="form-label">To'lov turi</label>
+              <select id="repay-method-input" class="neo-input" style="background: var(--bg-secondary);">
+                <option value="cash">Naqd pul (Cash)</option>
+                <option value="card">Plastik karta (Card)</option>
+                <option value="click">Click (QR To'lov)</option>
+              </select>
+            </div>
+            
+            <!-- Click QR Repayment Container -->
+            <div id="repay-click-qr-container" style="display: none; flex-direction: column; align-items: center; margin-top: 15px; margin-bottom: 15px; background: rgba(0, 242, 254, 0.03); border: 1px dashed rgba(0, 242, 254, 0.3); padding: 15px; border-radius: 10px; text-align: center; box-sizing: border-box;">
+              <h4 style="margin: 0 0 10px 0; font-size: 13px; color: #00f2fe; font-weight: 600;"><i class="fas fa-qrcode" style="margin-right: 6px;"></i> Click QR orqali to'lash</h4>
+              <div id="repay-click-qr-holder" style="background: #ffffff; padding: 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; width: 170px; height: 170px; box-sizing: border-box;">
+                <img id="repay-click-qr-img" src="" style="width: 150px; height: 150px; display: block;" alt="Click QR">
+              </div>
+              <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 5px;">
+                Mijoz ushbu QR kodni skaner qilib to'lovni amalga oshirishi lozim.
+              </div>
+              <div style="font-size: 10px; font-weight: 600; color: #10b981; display: flex; align-items: center; gap: 4px; justify-content: center;">
+                <i class="fas fa-spinner fa-spin"></i> To'lov holati kutilmoqda...
+              </div>
+            </div>
+
+            <button type="submit" id="repay-submit-btn" class="btn-primary" style="background: #f59e0b; color: #ffffff; width: 100%; padding: 12px; border: none; font-weight: 600; border-radius: 20px;">
+              To'lovni Saqlash
+            </button>
+          </form>
+
+          <!-- Repayment Schedule -->
+          <div style="margin-top: 20px;">
+            <h4 style="font-size: 13px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; margin-bottom: 8px;"><i class="fas fa-calendar-alt" style="color: #00f2fe; margin-right: 6px;"></i> Oylik to'lovlar jadvali (12 oygacha)</h4>
+            <div id="repay-schedule-body" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; padding: 4px 0; box-sizing: border-box;">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+
+          <!-- History of payments -->
+          <div style="margin-top: 20px;">
+            <h4 style="font-size: 13px; font-weight: 600; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 6px; margin-bottom: 8px;">To'lovlar tarixi</h4>
+            <div style="max-height: 150px; overflow-y: auto;">
+              <table class="neo-table" style="font-size: 12px;">
+                <thead>
+                  <tr>
+                    <th>Sana</th>
+                    <th>Summa</th>
+                    <th>Turi</th>
+                  </tr>
+                </thead>
+                <tbody id="repay-history-body">
+                  <!-- Log items -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1251,65 +1856,8 @@
     <div class="toast-container" id="toast-container"></div>
   </div>
 
-  <script>
-    // Bulletproof periodic layout guard for Cashier vs Admin visibility using exact IDs
-    setInterval(() => {
-      const token = localStorage.getItem('telebar_token');
-      const shell = document.getElementById('main-shell');
-      const dbgTokenSpan = document.getElementById('debug-token');
-      
-      if (dbgTokenSpan) {
-        dbgTokenSpan.innerText = token ? token : 'no-token';
-      }
-
-      const dashLink = document.getElementById('nav-dash');
-      const whLink = document.getElementById('nav-wh');
-      const staffLink = document.getElementById('nav-staff-tab');
-      const branchesLink = document.getElementById('nav-branches-tab');
-      const settingsLink = document.getElementById('nav-set');
-      const addProductBtn = document.getElementById('open-add-product-modal');
-
-      if (token) {
-        const isAdmin = token.includes('admin');
-        if (!isAdmin) {
-          // Cashier Session
-          if (shell) {
-            shell.classList.add('role-cashier');
-            shell.classList.remove('role-admin');
-          }
-          if (dashLink) dashLink.style.setProperty('display', 'none', 'important');
-          if (whLink) whLink.style.removeProperty('display');
-          if (staffLink) staffLink.style.setProperty('display', 'none', 'important');
-          if (branchesLink) branchesLink.style.setProperty('display', 'none', 'important');
-          if (settingsLink) settingsLink.style.setProperty('display', 'none', 'important');
-          if (addProductBtn) addProductBtn.style.setProperty('display', 'none', 'important');
-        } else {
-          // Admin Session
-          if (shell) {
-            shell.classList.add('role-admin');
-            shell.classList.remove('role-cashier');
-          }
-          if (dashLink) dashLink.style.removeProperty('display');
-          if (whLink) whLink.style.removeProperty('display');
-          if (staffLink) staffLink.style.removeProperty('display');
-          if (branchesLink) branchesLink.style.removeProperty('display');
-          if (settingsLink) settingsLink.style.removeProperty('display');
-          if (addProductBtn) addProductBtn.style.removeProperty('display');
-        }
-      } else {
-        // If not logged in, show all in default state
-        if (dashLink) dashLink.style.removeProperty('display');
-        if (whLink) whLink.style.removeProperty('display');
-        if (staffLink) staffLink.style.removeProperty('display');
-        if (branchesLink) branchesLink.style.removeProperty('display');
-        if (settingsLink) settingsLink.style.removeProperty('display');
-        if (addProductBtn) addProductBtn.style.removeProperty('display');
-      }
-    }, 200);
-  </script>
-
-
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

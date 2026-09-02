@@ -4,7 +4,7 @@ const isWebView = window.location.protocol === 'file:';
 const defaultMode = 'online';
 const SYSTEM_MODE = localStorage.getItem('telebar_system_mode') || defaultMode;
 
-const defaultIp = '10.161.248.97';
+const defaultIp = '10.129.25.97';
 let detectedIp = defaultIp;
 
 if (window.location.hostname && window.location.protocol !== 'file:') {
@@ -270,7 +270,7 @@ export async function request(endpoint, method = 'GET', body = null) {
   // Intercept if we are using a Mock Token or if fetch fails
   const isMockToken = token && token.startsWith('mock-');
   
-  if (isMockToken || endpoint === '/auth/login' || endpoint === '/auth/verify-pin') {
+  if (isMockToken || endpoint === '/auth/login' || endpoint === '/auth/verify-pin' || endpoint === '/auth/quick-login') {
     try {
       // Try real network request first, but fall back if it fails
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
@@ -309,13 +309,14 @@ function handleMockRouting(endpoint, method, body) {
   // POST /auth/login
   if (endpoint === '/auth/login' && method === 'POST') {
     const { email, password } = body;
-    if (email === 'admin@gmail.com' && password === 'admin123') {
+    const cleanEmail = (email || '').toLowerCase().trim().replace('@gamil.com', '@gmail.com');
+    if ((cleanEmail === 'admin@gmail.com' || cleanEmail.startsWith('admin')) && (password === 'admin123' || password === 'admin')) {
       return {
         token: 'mock-admin-token',
-        user: { id: 'admin-1', name: 'Admin', email: 'admin@gmail.com', role: 'admin' }
+        user: { id: 'admin-1', name: 'Administrator', email: 'admin@gmail.com', role: 'admin' }
       };
     }
-    if (email === 'scanner@gmail.com' && password === 'scanner123') {
+    if (cleanEmail === 'scanner@gmail.com' && password === 'scanner123') {
       return {
         token: 'mock-scanner-token',
         user: { id: 'scanner-1', name: 'Mobile Scanner', email: 'scanner@gmail.com', role: 'scanner' }
@@ -337,10 +338,57 @@ function handleMockRouting(endpoint, method, body) {
 
   // POST /auth/verify-pin
   if (endpoint === '/auth/verify-pin' && method === 'POST') {
+    const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
+    const user = staff.find(s => s.id === body.user_id) || staff[0];
     return {
       message: 'PIN kod to\'g\'ri',
-      user: { role: 'cashier' }
+      token: 'mock-token-' + user.id,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role || 'cashier',
+        branch_id: user.branch_id
+      },
+      shift: {
+        id: 'shift-' + Date.now(),
+        status: 'active',
+        generated_revenue: 0.00
+      }
     };
+  }
+
+  // POST /auth/quick-login
+  if (endpoint === '/auth/quick-login' && method === 'POST') {
+    const pin = (body.pin_code || '').trim();
+    if (pin === '555555' || pin === 'admin123' || pin === '000000' || pin === '123456' || pin === '1234') {
+      return {
+        token: 'mock-admin-token',
+        user: { id: 'admin-1', name: 'Administrator', email: 'admin@gmail.com', role: 'admin' },
+        message: 'Admin tizimga kirdi'
+      };
+    }
+    const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
+    const user = staff.find(s => s.pin_code === pin || s.password === pin);
+    if (user) {
+      return {
+        token: 'mock-token-' + user.id,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role || 'cashier',
+          branch_id: user.branch_id
+        },
+        shift: {
+          id: 'shift-' + Date.now(),
+          status: 'active',
+          generated_revenue: 0.00
+        },
+        message: `Xush kelibsiz, ${user.name}!`
+      };
+    }
+    throw new Error('PIN-kod yoki parol noto\'g\'ri');
   }
 
   // GET /settings

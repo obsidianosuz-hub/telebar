@@ -264,6 +264,249 @@ class ShiftController extends Controller
     }
 
     /**
+     * Get Current Shift for the authenticated user (Cashier).
+     */
+    public function getCurrentShift(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Avtorizatsiyadan o\'tilmagan'], 401);
+        }
+
+        $activeShift = Shift::with(['user.branch', 'sales'])
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+
+        // If cashier is logged in but has no active shift, auto initialize one
+        if (!$activeShift && $user->role === 'cashier') {
+            $activeShift = $this->initializeCashierShift($user);
+        }
+
+        if (!$activeShift) {
+            return response()->json([
+                'active' => false,
+                'shift' => null,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'role' => $user->role
+                ]
+            ], 200);
+        }
+
+        // Live revenue and sales count for this shift
+        $revenue = Sale::where('shift_id', $activeShift->id)->sum('total_price');
+        $salesCount = Sale::where('shift_id', $activeShift->id)->count();
+
+        // Calculate live elapsed seconds
+        $elapsedSeconds = abs(Carbon::now()->diffInSeconds($activeShift->start_time));
+
+        return response()->json([
+            'active' => true,
+            'shift' => [
+                'id' => $activeShift->id,
+                'start_time' => $activeShift->start_time->toIso8601String(),
+                'elapsed_seconds' => $elapsedSeconds,
+                'shift_type' => $activeShift->shift_type,
+                'status' => $activeShift->status,
+                'generated_revenue' => (float)$revenue,
+                'sales_count' => (int)$salesCount,
+            ],
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'role' => $user->role,
+                'branch' => $user->branch ? $user->branch->name : 'Biriktirilmagan'
+            ]
+        ], 200);
+    }
+
+    /**
+     * Cashier Endpoint: End current active shift and logout.
+     */
+    public function endCurrentShift(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Foydalanuvchi aniqlanmadi'], 401);
+        }
+
+        $shift = Shift::where('user_id', $user->id)->where('status', 'active')->first();
+        if (!$shift) {
+            return response()->json(['message' => 'Faol navbatchilik topilmadi'], 404);
+        }
+
+        $shift->end_time = Carbon::now();
+        $shift->status = 'completed';
+
+        // Calculate final revenue
+        $revenue = Sale::where('shift_id', $shift->id)->sum('total_price');
+        $salesCount = Sale::where('shift_id', $shift->id)->count();
+        $shift->generated_revenue = $revenue;
+
+        // Calculate duration & wages
+        $durationMinutes = $shift->start_time->diffInMinutes($shift->end_time);
+        $hours = $durationMinutes / 60.0;
+        $settingsList = \App\Models\Setting::all()->pluck('value', 'key');
+        $hourlyRateSetting = $settingsList['salary_rules']['hourly_rate'] ?? 15;
+        $nightMultiplierSetting = $settingsList['salary_rules']['night_shift_multiplier'] ?? 1.5;
+        
+        $baseRate = ($user->wage_structure > 0) ? $user->wage_structure : $hourlyRateSetting;
+        $multiplier = ($shift->shift_type === 'night') ? $nightMultiplierSetting : 1.0;
+        $shift->calculated_wage = $hours * $baseRate * $multiplier;
+        $shift->save();
+
+        // Format duration readable
+        $hoursPart = floor($durationMinutes / 60);
+        $minutesPart = $durationMinutes % 60;
+        $durationText = ($hoursPart > 0 ? "{$hoursPart} soat " : "") . "{$minutesPart} daqiqa";
+
+        // Log activity
+        \App\Models\ActivityLog::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action_type' => 'shift_end',
+            'description' => "Navbatchilik yakunlandi: {$user->name} (Ishlagan vaqti: {$durationText}, Jami savdo: $" . number_format($revenue, 2) . ")",
+        ]);
+
+        // Send telemetry event to Node.js
+        $this->sendTelemetry('shift:ended', [
+            'shift_id' => $shift->id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'shift_type' => $shift->shift_type,
+            'start_time' => $shift->start_time->toIso8601String(),
+            'end_time' => $shift->end_time->toIso8601String(),
+            'revenue' => $revenue,
+            'sales_count' => $salesCount,
+            'duration' => $durationText,
+            'wage' => $shift->calculated_wage
+        ]);
+
+        return response()->json([
+            'message' => 'Navbatchilik muvaffaqiyatli yakunlandi',
+            'summary' => [
+                'shift_id' => $shift->id,
+                'cashier_name' => $user->name,
+                'start_time' => $shift->start_time->toIso8601String(),
+                'end_time' => $shift->end_time->toIso8601String(),
+                'duration' => $durationText,
+                'total_revenue' => (float)$revenue,
+                'sales_count' => $salesCount,
+                'calculated_wage' => (float)$shift->calculated_wage
+            ]
+        ], 200);
+    }
+
+    /**
+     * Admin Endpoint: Detailed Staff Work Hours & Shift History Tracker.
+     */
+    public function getStaffWorkHours()
+    {
+        // 1. Live Active Sessions
+        $activeShifts = Shift::with(['user.branch', 'sales'])
+            ->where('status', 'active')
+            ->get()
+            ->map(function ($s) {
+                $revenue = Sale::where('shift_id', $s->id)->sum('total_price');
+                $salesCount = Sale::where('shift_id', $s->id)->count();
+                $elapsedSeconds = abs(Carbon::now()->diffInSeconds($s->start_time));
+                
+                return [
+                    'shift_id' => $s->id,
+                    'user_id' => $s->user_id,
+                    'user_name' => $s->user->name ?? 'Kassir',
+                    'user_email' => $s->user->email ?? '',
+                    'branch_name' => $s->user && $s->user->branch ? $s->user->branch->name : 'Bosh do\'kon',
+                    'shift_type' => $s->shift_type,
+                    'start_time' => $s->start_time->toIso8601String(),
+                    'elapsed_seconds' => $elapsedSeconds,
+                    'revenue' => (float)$revenue,
+                    'sales_count' => (int)$salesCount,
+                    'status' => 'online'
+                ];
+            });
+
+        // 2. All Cashiers with Online / Offline Status
+        $allStaff = User::whereIn('role', ['cashier', 'admin'])
+            ->with('branch')
+            ->get()
+            ->map(function ($u) {
+                $active = Shift::where('user_id', $u->id)->where('status', 'active')->first();
+                $todayShifts = Shift::where('user_id', $u->id)
+                    ->whereDate('created_at', Carbon::today())
+                    ->get();
+
+                $todayRevenue = Sale::whereIn('shift_id', $todayShifts->pluck('id'))->sum('total_price');
+                $todaySalesCount = Sale::whereIn('shift_id', $todayShifts->pluck('id'))->count();
+                
+                $todayMinutes = $todayShifts->reduce(function ($carry, $s) {
+                    $endTime = $s->end_time ?: Carbon::now();
+                    return $carry + $s->start_time->diffInMinutes($endTime);
+                }, 0);
+
+                return [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'role' => $u->role,
+                    'branch_name' => $u->branch ? $u->branch->name : 'Biriktirilmagan',
+                    'is_online' => (bool)$active,
+                    'active_shift_id' => $active ? $active->id : null,
+                    'active_since' => $active ? $active->start_time->toIso8601String() : null,
+                    'today_revenue' => (float)$todayRevenue,
+                    'today_sales_count' => (int)$todaySalesCount,
+                    'today_hours' => round($todayMinutes / 60.0, 1),
+                    'wage_rate' => (float)$u->wage_structure
+                ];
+            });
+
+        // 3. Shift History Logs (Last 50 shifts)
+        $history = Shift::with(['user.branch'])
+            ->orderBy('created_at', 'desc')
+            ->take(50)
+            ->get()
+            ->map(function ($s) {
+                $durationMin = $s->end_time ? $s->start_time->diffInMinutes($s->end_time) : $s->start_time->diffInMinutes(Carbon::now());
+                $hours = floor($durationMin / 60);
+                $mins = $durationMin % 60;
+                $durationStr = ($hours > 0 ? "{$hours}s " : "") . "{$mins}d";
+
+                return [
+                    'id' => $s->id,
+                    'user_name' => $s->user->name ?? 'O\'chirilgan xodim',
+                    'branch_name' => $s->user && $s->user->branch ? $s->user->branch->name : 'Bosh do\'kon',
+                    'shift_type' => $s->shift_type,
+                    'status' => $s->status,
+                    'start_time' => $s->start_time->toIso8601String(),
+                    'end_time' => $s->end_time ? $s->end_time->toIso8601String() : null,
+                    'duration' => $durationStr,
+                    'duration_minutes' => $durationMin,
+                    'revenue' => (float)$s->generated_revenue,
+                    'calculated_wage' => (float)$s->calculated_wage
+                ];
+            });
+
+        // 4. Overall Today Summary
+        $todayShifts = Shift::whereDate('created_at', Carbon::today())->get();
+        $todayRevenue = Sale::whereDate('created_at', Carbon::today())->sum('total_price');
+        $todaySalesCount = Sale::whereDate('created_at', Carbon::today())->count();
+
+        return response()->json([
+            'active_sessions' => $activeShifts,
+            'all_staff' => $allStaff,
+            'history' => $history,
+            'today_summary' => [
+                'active_cashiers' => $activeShifts->count(),
+                'total_revenue_today' => (float)$todayRevenue,
+                'total_sales_today' => (int)$todaySalesCount,
+                'total_shifts_today' => $todayShifts->count()
+            ]
+        ], 200);
+    }
+
+    /**
      * Send HTTP POST Telemetry package to the Node.js service.
      */
     protected function sendTelemetry($event, $data)

@@ -15,6 +15,8 @@ class Sale extends Model
         'product_id',
         'quantity',
         'total_price',
+        'payment_method',
+        'payment_status',
         'timestamp',
     ];
 
@@ -38,5 +40,13 @@ class Sale extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Relationship: The associated debt record if sold on credit
+     */
+    public function debt()
+    {
+        return $this->hasOne(Debt::class);
     }
 }

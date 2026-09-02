@@ -10,6 +10,7 @@ use App\Http\Controllers\ScanRequestController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerOrderController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\DebtController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,8 +20,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public login routes
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
 Route::post('/auth/verify-pin', [AuthController::class, 'verifyPin']);
+Route::post('/auth/quick-login', [AuthController::class, 'quickLogin']);
 Route::post('/payments/click/webhook', [App\Http\Controllers\ClickPaymentController::class, 'handleWebhook']);
 
 // Protected routes (Sanctum)
@@ -33,7 +35,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sales/history', [SaleController::class, 'history']);
     Route::get('/settings', [SettingController::class, 'index']);
 
-    // Admin & General Shift checks
+    // Shift Operations & Work Hours Tracking
+    Route::get('/shifts/current', [ShiftController::class, 'getCurrentShift']);
+    Route::post('/shifts/end', [ShiftController::class, 'endCurrentShift']);
+    Route::get('/shifts/staff-work-hours', [ShiftController::class, 'getStaffWorkHours']);
     Route::get('/shifts', [ShiftController::class, 'index']);
     Route::get('/shifts/analytics', [ShiftController::class, 'getAnalytics']);
 
@@ -69,4 +74,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Partners & Ordering Flow
     Route::apiResource('partners', PartnerController::class);
     Route::apiResource('partner-orders', PartnerOrderController::class);
+
+    // Debts & Repayments Flow
+    Route::get('/debts', [DebtController::class, 'index']);
+    Route::get('/debts/{id}', [DebtController::class, 'show']);
+    Route::post('/debts', [DebtController::class, 'store']);
+    Route::post('/debts/{id}/repay', [DebtController::class, 'repay']);
+    Route::get('/debts/{id}/payments', [DebtController::class, 'payments']);
+    Route::post('/debts/{id}/approve', [DebtController::class, 'approve']);
+    Route::post('/debts/{id}/reject', [DebtController::class, 'reject']);
 });
