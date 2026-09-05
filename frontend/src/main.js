@@ -427,22 +427,15 @@ async function submitPinCode() {
 }
 
 async function loginSuccess(user) {
+  // 1. Immediately switch screens with zero delay (0ms)
   document.getElementById('auth-screen').style.display = 'none';
-  
-  try {
-    const settings = await request('/settings', 'GET');
-    currentSettings = settings;
-    applySystemSettings(settings);
-  } catch (e) {
-    console.warn("Could not load settings on login:", e.message);
-  }
   
   const shell = document.getElementById('main-shell');
   shell.style.display = 'flex';
   shell.classList.remove('role-admin', 'role-cashier', 'role-scanner');
   shell.classList.add(`role-${user.role}`);
   
-  // Update header labels
+  // 2. Update header labels
   document.getElementById('header-user-name').innerText = user.name;
   let roleTextKey = 'role_cashier';
   if (user.role === 'admin') roleTextKey = 'role_admin';
@@ -453,7 +446,7 @@ async function loginSuccess(user) {
     headerRole.setAttribute('data-i18n', roleTextKey);
   }
   
-  // Set tab visibility based on Role-Based Access Control (RBAC)
+  // 3. Set tab visibility based on Role-Based Access Control (RBAC) immediately
   const sidebar = document.querySelector('.app-sidebar');
   if (user.role === 'scanner') {
     if (sidebar) sidebar.style.display = 'none';
@@ -500,14 +493,20 @@ async function loginSuccess(user) {
 
   applyTranslations();
 
-  // Initialize Cashier Shift Live Tracking or Admin Monitoring
+  // 4. Initialize active components and data in parallel
   initCashierShiftTracking(user);
-
-  // Establish live Telemetry Websockets channel
   initSocket(handleTelemetryEvent);
-
-  // Load active tab data
   refreshActiveTabData();
+
+  // 5. Load and apply custom branding/settings in background
+  request('/settings', 'GET').then(settings => {
+    if (settings) {
+      currentSettings = settings;
+      applySystemSettings(settings);
+    }
+  }).catch(e => {
+    console.warn("Could not load settings on login:", e.message);
+  });
 }
 
 /**

@@ -258,7 +258,11 @@ if (!localStorage.getItem('mock_debts')) {
  * Standard HTTP Request handler to Laravel Backend with Offline Demo Mock Fallback
  */
 export async function request(endpoint, method = 'GET', body = null) {
-  if (SYSTEM_MODE === 'offline') {
+  const isFileProtocol = window.location.protocol === 'file:';
+  const isDemoUrl = window.location.href.includes('demo.html') || window.location.href.includes('telebar.html');
+  const isMockToken = token && token.startsWith('mock-');
+  
+  if (SYSTEM_MODE === 'offline' || isFileProtocol || isDemoUrl || isMockToken) {
     return handleMockRouting(endpoint, method, body);
   }
 
@@ -280,24 +284,14 @@ export async function request(endpoint, method = 'GET', body = null) {
     config.body = JSON.stringify(body);
   }
 
-  // Intercept if we are using a Mock Token or if fetch fails
-  const isMockToken = token && token.startsWith('mock-');
-  
-  if (isMockToken || endpoint === '/auth/login' || endpoint === '/auth/verify-pin' || endpoint === '/auth/quick-login') {
-    try {
-      // Try real network request first, but fall back if it fails
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message);
-      return data;
-    } catch (e) {
-      console.log(`[API Redirect] Backend offline. Routing "${endpoint}" via local Mock database...`);
-      return handleMockRouting(endpoint, method, body);
-    }
-  }
+  // Fast AbortController so it never hangs more than 500ms on slow network
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 500);
+  config.signal = controller.signal;
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    clearTimeout(timeoutId);
     const data = await response.json();
 
     if (!response.ok) {
@@ -310,7 +304,7 @@ export async function request(endpoint, method = 'GET', body = null) {
 
     return data;
   } catch (error) {
-    console.warn(`[API Redirect] Fallback to Mock database due to error:`, error.message);
+    clearTimeout(timeoutId);
     return handleMockRouting(endpoint, method, body);
   }
 }
