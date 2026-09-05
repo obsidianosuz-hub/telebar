@@ -239,15 +239,35 @@ async function handleQuickLoginFormSubmit(e) {
     loginSuccess(currentUser);
     showToast(res.message || 'Muvaffaqiyatli tizimga kirildi', 'success');
   } catch (error) {
-    // Fallback for offline demo mode
-    if (pin_code === '555555' || pin_code === '123456' || pin_code === '1234' || pin_code === 'admin123' || pin_code === '000000') {
+    // Instant Fallback for offline demo mode
+    if (pin_code === '555555' || pin_code === '000000' || pin_code === 'admin123') {
       setToken('mock-admin-token');
       currentUser = { id: 'mock-admin-id', name: 'Administrator', email: 'admin@gmail.com', role: 'admin' };
       loginSuccess(currentUser);
-      showToast('Tezkor rejimda Administrator sifatida kirildi', 'success');
+      showToast('Administrator sifatida kirildi', 'success');
       return;
     }
-    showToast(error.message, 'danger');
+    if (pin_code === '999999' || pin_code === 'scanner123') {
+      setToken('mock-scanner-token');
+      currentUser = { id: 'mock-scanner-id', name: 'Qurilma Skanerlovchi', email: 'scanner@gmail.com', role: 'scanner' };
+      loginSuccess(currentUser);
+      showToast('Skanerlovchi qurilma sifatida kirildi', 'success');
+      return;
+    }
+    const cashierNames = {
+      '123456': 'Yunusobod Kassiri',
+      '234567': 'Chilonzor Kassiri',
+      '345678': 'Diyorbek Kassir',
+      '456789': 'Sardor Kassir'
+    };
+    if (cashierNames[pin_code]) {
+      setToken('mock-token-cashier');
+      currentUser = { id: 'mock-cashier-id', name: cashierNames[pin_code], email: 'cashier@gmail.com', role: 'cashier' };
+      loginSuccess(currentUser);
+      showToast(`${cashierNames[pin_code]} sifatida kirildi`, 'success');
+      return;
+    }
+    showToast(error.message || 'PIN kod noto\'g\'ri', 'danger');
   }
 }
 
@@ -2800,6 +2820,21 @@ function setupEventListeners() {
             break;
           }
         }
+      }
+    });
+  });
+
+  // Quick 1-Click Fast Role Logins
+  document.querySelectorAll('.btn-demo-quick-auth').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pin = btn.getAttribute('data-pin');
+      const boxes = document.querySelectorAll('.pin-box');
+      if (pin && boxes.length >= 6) {
+        pin.split('').forEach((digit, i) => {
+          if (boxes[i]) boxes[i].value = digit;
+        });
+        handleQuickLoginFormSubmit();
       }
     });
   });
