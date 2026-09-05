@@ -128,6 +128,7 @@ if (!localStorage.getItem('mock_staff')) {
       name: "Yunusobod Kassiri",
       email: "cashier@gmail.com",
       role: "cashier",
+      pin_code: "123456",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
     },
@@ -137,6 +138,7 @@ if (!localStorage.getItem('mock_staff')) {
       name: "Chilonzor Kassiri",
       email: "cashier2@gmail.com",
       role: "cashier",
+      pin_code: "234567",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
     },
@@ -146,6 +148,7 @@ if (!localStorage.getItem('mock_staff')) {
       name: "Diyorbek Kassir",
       email: "diyorbek@gmail.com",
       role: "cashier",
+      pin_code: "345678",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
     },
@@ -155,6 +158,7 @@ if (!localStorage.getItem('mock_staff')) {
       name: "Sardor Kassir",
       email: "sardor@gmail.com",
       role: "cashier",
+      pin_code: "456789",
       wage_structure: 15.00,
       operational_hours: ["Dush-Jum: 08:00 - 20:00"]
     },
@@ -164,6 +168,7 @@ if (!localStorage.getItem('mock_staff')) {
       name: "Qurilma Skanerlovchi",
       email: "scanner@gmail.com",
       role: "scanner",
+      pin_code: "999999",
       wage_structure: 0.00,
       operational_hours: ["Har kuni 24/7"]
     }
@@ -226,17 +231,25 @@ if (!localStorage.getItem('mock_partners')) {
   ]));
 }
 
-if (!localStorage.getItem('mock_partner_orders')) {
-  localStorage.setItem('mock_partner_orders', JSON.stringify([
+if (!localStorage.getItem('mock_debts')) {
+  localStorage.setItem('mock_debts', JSON.stringify([
     {
-      id: "order-1",
-      partner_id: "partner-1",
+      id: "debt-1",
+      customer_name: "Azizbek Karimov",
+      customer_phone: "+998 90 123 45 67",
+      passport_series: "AA",
+      passport_number: "1234567",
       product_name: "iPhone 15 Pro Max",
-      quantity: 50,
-      contract_note: "Yetkazib berish shartlari: FOB Shanghai, Kafolat: 1 yil.",
-      customs_duty: 12.00,
-      status: "pending",
-      created_at: new Date().toISOString()
+      total_amount: 1350.00,
+      initial_payment: 350.00,
+      remaining_amount: 1000.00,
+      monthly_payment: 166.67,
+      period_months: 6,
+      status: "active",
+      created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
+      payments: [
+        { id: "pay-1", amount: 166.67, payment_method: "cash", paid_at: new Date(Date.now() - 86400000 * 2).toISOString() }
+      ]
     }
   ]));
 }
@@ -361,16 +374,40 @@ function handleMockRouting(endpoint, method, body) {
   // POST /auth/quick-login
   if (endpoint === '/auth/quick-login' && method === 'POST') {
     const pin = (body.pin_code || '').trim();
-    if (pin === '555555' || pin === 'admin123' || pin === '000000' || pin === '123456' || pin === '1234') {
+    if (pin === '555555' || pin === 'admin123' || pin === '000000') {
       return {
         token: 'mock-admin-token',
         user: { id: 'admin-1', name: 'Administrator', email: 'admin@gmail.com', role: 'admin' },
         message: 'Admin tizimga kirdi'
       };
     }
+    if (pin === '999999' || pin === 'scanner123') {
+      return {
+        token: 'mock-scanner-token',
+        user: { id: 'scanner-1', name: 'Qurilma Skanerlovchi', email: 'scanner@gmail.com', role: 'scanner' },
+        message: 'Skaner tizimga kirdi'
+      };
+    }
     const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
-    const user = staff.find(s => s.pin_code === pin || s.password === pin);
+    let user = staff.find(s => s.pin_code === pin || s.password === pin);
+    if (!user) {
+      if (pin === '123456') user = staff.find(s => s.email === 'cashier@gmail.com') || staff[0];
+      else if (pin === '234567') user = staff.find(s => s.email === 'cashier2@gmail.com');
+      else if (pin === '345678') user = staff.find(s => s.email === 'diyorbek@gmail.com');
+      else if (pin === '456789') user = staff.find(s => s.email === 'sardor@gmail.com');
+    }
     if (user) {
+      const activeShift = {
+        id: 'shift-' + Date.now(),
+        user_id: user.id,
+        user_name: user.name,
+        branch_name: 'Yunusobod filiali',
+        start_time: new Date().toISOString(),
+        status: 'active',
+        generated_revenue: 0.00,
+        sales_count: 0
+      };
+      localStorage.setItem('mock_active_shift_' + user.id, JSON.stringify(activeShift));
       return {
         token: 'mock-token-' + user.id,
         user: {
@@ -380,15 +417,129 @@ function handleMockRouting(endpoint, method, body) {
           role: user.role || 'cashier',
           branch_id: user.branch_id
         },
-        shift: {
-          id: 'shift-' + Date.now(),
-          status: 'active',
-          generated_revenue: 0.00
-        },
+        shift: activeShift,
         message: `Xush kelibsiz, ${user.name}!`
       };
     }
-    throw new Error('PIN-kod yoki parol noto\'g\'ri');
+    throw new Error('PIN-kod noto\'g\'ri');
+  }
+
+  // GET /shifts/current
+  if (endpoint === '/shifts/current' && method === 'GET') {
+    const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
+    let currentUserId = 'a25d3da8-77e1-4f5b-921e-1edb42fbd969';
+    if (token && token.startsWith('mock-token-')) {
+      currentUserId = token.replace('mock-token-', '');
+    }
+    const user = staff.find(s => s.id === currentUserId) || staff[0];
+    let activeShift = JSON.parse(localStorage.getItem('mock_active_shift_' + user.id) || 'null');
+    if (!activeShift) {
+      activeShift = {
+        id: 'shift-' + Date.now(),
+        user_id: user.id,
+        user_name: user.name,
+        branch_name: 'Yunusobod filiali',
+        start_time: new Date().toISOString(),
+        status: 'active',
+        generated_revenue: 0.00,
+        sales_count: 0
+      };
+      localStorage.setItem('mock_active_shift_' + user.id, JSON.stringify(activeShift));
+    }
+    const startTimestamp = new Date(activeShift.start_time).getTime();
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startTimestamp) / 1000));
+    return {
+      active: true,
+      shift: {
+        ...activeShift,
+        elapsed_seconds: elapsedSeconds
+      }
+    };
+  }
+
+  // POST /shifts/end
+  if (endpoint === '/shifts/end' && method === 'POST') {
+    const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
+    let currentUserId = 'a25d3da8-77e1-4f5b-921e-1edb42fbd969';
+    if (token && token.startsWith('mock-token-')) {
+      currentUserId = token.replace('mock-token-', '');
+    }
+    const user = staff.find(s => s.id === currentUserId) || staff[0];
+    let activeShift = JSON.parse(localStorage.getItem('mock_active_shift_' + user.id) || 'null');
+    const start = activeShift ? new Date(activeShift.start_time) : new Date(Date.now() - 3600000);
+    const end = new Date();
+    const diffSec = Math.floor((end - start) / 1000);
+    const hours = Math.floor(diffSec / 3600);
+    const minutes = Math.floor((diffSec % 3600) / 60);
+    const durationText = `${hours > 0 ? hours + ' soat ' : ''}${minutes} daqiqa`;
+    const revenue = activeShift ? activeShift.generated_revenue || 0 : 0;
+    const salesCount = activeShift ? activeShift.sales_count || 0 : 0;
+    const wage = ((diffSec / 3600) * 15.0).toFixed(2);
+
+    const completedShift = {
+      id: 'shift-log-' + Date.now(),
+      shift_id: activeShift ? activeShift.id : 'shift-1',
+      cashier_name: user.name,
+      branch_name: 'Yunusobod filiali',
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      duration: durationText,
+      total_revenue: revenue,
+      sales_count: salesCount,
+      calculated_wage: parseFloat(wage)
+    };
+
+    const history = JSON.parse(localStorage.getItem('mock_shifts_history') || '[]');
+    history.unshift(completedShift);
+    localStorage.setItem('mock_shifts_history', JSON.stringify(history));
+    localStorage.removeItem('mock_active_shift_' + user.id);
+
+    return {
+      message: 'Navbatchilik muvaffaqiyatli yakunlandi',
+      summary: completedShift
+    };
+  }
+
+  // GET /shifts/staff-work-hours
+  if (endpoint === '/shifts/staff-work-hours' && method === 'GET') {
+    const staff = JSON.parse(localStorage.getItem('mock_staff') || '[]');
+    const history = JSON.parse(localStorage.getItem('mock_shifts_history') || '[]');
+    
+    // Check any active shifts in storage
+    const activeShifts = [];
+    staff.forEach(s => {
+      const active = JSON.parse(localStorage.getItem('mock_active_shift_' + s.id) || 'null');
+      if (active) {
+        const startTimestamp = new Date(active.start_time).getTime();
+        const elapsed = Math.max(0, Math.floor((Date.now() - startTimestamp) / 1000));
+        activeShifts.push({
+          shift_id: active.id,
+          user_id: s.id,
+          user_name: s.name,
+          user_email: s.email,
+          branch_name: 'Yunusobod filiali',
+          shift_type: 'day',
+          start_time: active.start_time,
+          elapsed_seconds: elapsed,
+          revenue: active.generated_revenue || 0,
+          sales_count: active.sales_count || 0,
+          status: 'online'
+        });
+      }
+    });
+
+    let todayRev = history.reduce((a, b) => a + (b.total_revenue || 0), 0);
+    activeShifts.forEach(a => todayRev += (a.revenue || 0));
+
+    return {
+      active_shifts: activeShifts,
+      completed_shifts: history,
+      today_totals: {
+        active_cashiers: activeShifts.length,
+        today_revenue: todayRev,
+        total_hours: history.length * 8 + (activeShifts.length > 0 ? 2 : 0)
+      }
+    };
   }
 
   // GET /settings
@@ -893,13 +1044,54 @@ function handleMockRouting(endpoint, method, body) {
     throw new Error("Buyurtma topilmadi");
   }
 
-  // DELETE /partner-orders/{id}
-  if (endpoint.startsWith('/partner-orders/') && method === 'DELETE') {
-    const id = endpoint.replace('/partner-orders/', '');
-    let orders = JSON.parse(localStorage.getItem('mock_partner_orders') || '[]');
-    orders = orders.filter(o => o.id !== id);
-    localStorage.setItem('mock_partner_orders', JSON.stringify(orders));
-    return { message: "Buyurtma o'chirildi (Demo)" };
+  // GET /debts
+  if (endpoint.startsWith('/debts') && endpoint.includes('/pay') === false && endpoint.includes('/approve') === false && method === 'GET') {
+    return JSON.parse(localStorage.getItem('mock_debts') || '[]');
+  }
+
+  // POST /debts
+  if (endpoint === '/debts' && method === 'POST') {
+    const debts = JSON.parse(localStorage.getItem('mock_debts') || '[]');
+    const newDebt = {
+      id: 'debt-' + Date.now(),
+      customer_name: body.customer_name || 'Mijoz',
+      customer_phone: body.customer_phone || '',
+      passport_series: body.passport_series || '',
+      passport_number: body.passport_number || '',
+      product_name: body.product_name || 'Mahsulot',
+      total_amount: parseFloat(body.total_amount) || 0,
+      initial_payment: parseFloat(body.initial_payment) || 0,
+      remaining_amount: (parseFloat(body.total_amount) || 0) - (parseFloat(body.initial_payment) || 0),
+      monthly_payment: parseFloat(body.monthly_payment) || 0,
+      period_months: parseInt(body.period_months) || 6,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      payments: []
+    };
+    debts.unshift(newDebt);
+    localStorage.setItem('mock_debts', JSON.stringify(debts));
+    return { message: 'Nasiya shartnomasi rasmiylashtirildi (Demo)', debt: newDebt };
+  }
+
+  // POST /debts/:id/pay
+  if (endpoint.includes('/debts/') && endpoint.endsWith('/pay') && method === 'POST') {
+    const debtId = endpoint.split('/')[2];
+    const debts = JSON.parse(localStorage.getItem('mock_debts') || '[]');
+    const debt = debts.find(d => d.id === debtId);
+    if (debt) {
+      const amount = parseFloat(body.amount) || 0;
+      debt.remaining_amount = Math.max(0, debt.remaining_amount - amount);
+      if (debt.remaining_amount <= 0) debt.status = 'paid';
+      debt.payments = debt.payments || [];
+      debt.payments.push({
+        id: 'pay-' + Date.now(),
+        amount: amount,
+        payment_method: body.payment_method || 'cash',
+        paid_at: new Date().toISOString()
+      });
+      localStorage.setItem('mock_debts', JSON.stringify(debts));
+      return { message: 'To\'lov qabul qilindi (Demo)', debt };
+    }
   }
 
   return {};
